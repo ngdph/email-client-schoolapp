@@ -1,0 +1,18 @@
+===============================================================================
+EXTENSION NAME : linecount
+EXTENSION VERSION : 0.1.7
+-------------------------------------------------------------------------------
+count time : 2020-03-19 23:43:28
+count workspace : d:\Workspace\UIT\socket-school-app
+total files : 6
+total code lines : 167
+total comment lines : 62
+total blank lines : 28
+
+.gitattributes, code is 59, comment is 0, blank is 4.
+.gitignore, code is 103, comment is 61, blank is 22.
+__pycache__\modules.cpython-38.pyc, it is a binary file.
+modules.py, code is 1, comment is 1, blank is 0.
+README.md, code is 1, comment is 0, blank is 0.
+setup.py, code is 3, comment is 0, blank is 2.
+===============================================================================

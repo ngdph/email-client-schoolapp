@@ -1,0 +1,54 @@
+{
+    "extension": "linecount",
+    "version": "0.1.7",
+    "workspace": "d:\\Workspace\\UIT\\socket-school-app",
+    "linecount": [
+        {
+            "version": "0.1.7",
+            "counttime": "2020-03-19 23:43:28",
+            "filesum": 6,
+            "codesum": 167,
+            "commentsum": 62,
+            "blanksum": 28,
+            "filelist": [
+                {
+                    "blank": 4,
+                    "code": 59,
+                    "comment": 0,
+                    "filename": ".gitattributes"
+                },
+                {
+                    "blank": 22,
+                    "code": 103,
+                    "comment": 61,
+                    "filename": ".gitignore"
+                },
+                {
+                    "filename": "__pycache__\\modules.cpython-38.pyc",
+                    "isbinaryfile": true,
+                    "blank": 0,
+                    "code": 0,
+                    "comment": 0
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 1,
+                    "filename": "modules.py"
+                },
+                {
+                    "blank": 0,
+                    "code": 1,
+                    "comment": 0,
+                    "filename": "README.md"
+                },
+                {
+                    "blank": 2,
+                    "code": 3,
+                    "comment": 0,
+                    "filename": "setup.py"
+                }
+            ]
+        }
+    ]
+}
