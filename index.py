@@ -1,5 +1,6 @@
-import tkinter
+import tkinter as TK
+from tkinter import *
 
-top = tkinter.Tk()
-# Code to add widgets will go here...
-top.mainloop()
+appRoot = TK.Tk(screenName="App Socket")
+appRoot.mainloop()
+
