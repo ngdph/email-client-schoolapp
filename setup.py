@@ -17,3 +17,5 @@ def polygon(t, length, n):
 polygon(bob, 100, 10)
 
 turtle.mainloop()
+
+# fixed 
