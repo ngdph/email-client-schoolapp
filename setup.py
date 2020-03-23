@@ -1,6 +1,19 @@
-from modules import tkinter
+import turtle
+import math
+bob = turtle.Turtle()
+bob.delay = 1.0
+print(bob)
 
-# appRoot = tkinter.Tk(screenName="App Socket")
-# appRoot.mainloop()
+def square(t, length):
+	for i in range(4):
+		t.fd(length)
+		t.lt(45)
 
-print(1, 2)
+def polygon(t, length, n):
+	for i in range(n):
+		t.fd(length)
+		t.lt(360/n)
+
+polygon(bob, 100, 10)
+
+turtle.mainloop()
