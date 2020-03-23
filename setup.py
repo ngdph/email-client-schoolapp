@@ -19,4 +19,4 @@ polygon(bob, 100, 10)
 turtle.mainloop()
 
 # fixed 
-# Tien oc cho, ngu lozz
+ádfádfádfádfádf
