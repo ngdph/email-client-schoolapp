@@ -7,7 +7,6 @@ import email
 
 ORG_EMAIL = "@gmail.com"
 FROM_EMAIL = "nguyen.dphux" + ORG_EMAIL
-FROM_PWD = "Viendanbac"
 SMTP_SERVER = "imap.gmail.com"
 SMTP_PORT = 993
 
