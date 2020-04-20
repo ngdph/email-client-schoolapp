@@ -11,7 +11,7 @@ SERVER = 'imap.gmail.com'
 # connect to the server and go to its inbox
 mail = imaplib.IMAP4_SSL(SERVER)
 print(34)
-mail.login(EMAIL, PASSWORD)
+# mail.login(EMAIL, PASSWORD)
 print(23)
 # we choose the inbox but you can select others
 mail.select('inbox')
