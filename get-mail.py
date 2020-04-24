@@ -1,82 +1,120 @@
 import email
 import imaplib
-import poplib
-import string
-import random
-from io import StringIO
-import logging
+import quopri
+import base64
+
+
+from email import header
+
 
 SERVER = 'imap.gmail.com'
+EMAIL = "nguyen.dphux@gmail.com"
+PASSWORD = ""
 
-# connect to the server and go to its inbox
-mail = imaplib.IMAP4_SSL(SERVER)
-print(34)
-# mail.login(EMAIL, PASSWORD)
-print(23)
-# we choose the inbox but you can select others
-mail.select('inbox')
 
-# we'll search using the ALL criteria to retrieve
-# every message inside the inbox
-# it will return with its status and a list of ids
-status, data = mail.search(None, 'ALL')
-# the list returned is a list of bytes separated
-# by white spaces on this format: [b'1 2 3', b'4 5 6']
-# so, to separate it first we create an empty list
-mail_ids = []
-# then we go through the list splitting its blocks
-# of bytes and appending to the mail_ids list
-for block in data:
-    # the split function called without parameter
-    # transforms the text or bytes into a list using
-    # as separator the white spaces:
-    # b'1 2 3'.split() => [b'1', b'2', b'3']
-    mail_ids += block.split()
+LABEL = ['inbox', 'starred', 'snoozed', 'important',
+         'chats', 'sent', 'drafts', 'all', 'spam', 'trash']
 
-# now for every id we'll fetch the email
-# to extract its content
-for i in mail_ids:
-    # the fetch function fetch the email given its id
-    # and format that you want the message to be
-    status, data = mail.fetch(i, '(RFC822)')
 
-    # the content data at the '(RFC822)' format comes on
-    # a list with a tuple with header, content, and the closing
-    # byte b')'
-    for response_part in data:
-        # so if its a tuple...
-        if isinstance(response_part, tuple):
-            # we go for the content at its second element
-            # skipping the header at the first and the closing
-            # at the third
-            message = email.message_from_bytes(response_part[1])
+def fetchEmail():
+    # Đăng nhập vào server
+    mail = imaplib.IMAP4_SSL(SERVER)
+    mail.login(EMAIL, PASSWORD)
+    # Chọn label cần lấy mail
+    mail.select('[Gmail]/Starred')
 
-            # with the content we can extract the info about
-            # who sent the message and its subject
-            mail_from = message['from']
-            mail_subject = message['subject']
+    # Tìm kiếm trong hộp thư theo LABEL
+    status, data = mail.search(None, 'ALL')
+    mails = []
+    mail_ids = []
 
-            # then for the text we have a little more work to do
-            # because it can be in plain text or multipart
-            # if its not plain text we need to separate the message
-            # from its annexes to get the text
-            if message.is_multipart():
-                mail_content = ''
+    # Lấy mail id
+    for block in data:
+        mail_ids += block.split()
 
-                # on multipart we have the text message and
-                # another things like annex, and html version
-                # of the message, in that case we loop through
-                # the email payload
-                for part in message.get_payload():
-                    # if the content type is text/plain
-                    # we extract it
-                    if part.get_content_type() == 'text/plain':
-                        mail_content += part.get_payload()
-            else:
-                # if the message isn't multipart, just extract it
+    # Duyệt qua từng id của mail và lấy mail về
+    for i in mail_ids:
+        status, data = mail.fetch(i, '(RFC822)')
+
+        # Khởi tạo dictionary chứa dữ liệu mail rỗng
+        mail_data = {
+            'from': None,
+            'subject': None,
+            'content': []
+        }
+
+        # Duyệt qua các thành phần của mail
+        for response_part in data:
+
+            # Khởi tạo dict chứa dữ liệu content của mail
+            data_part = {
+                "contentType": None,
+                "encodeType": None,
+                "payload": None,
+                "filename": None
+            }
+
+            # Nếu dữ liệu là tuple thì xét
+            if isinstance(response_part, tuple):
+
+                # Lấy From và Subject của mail
+                message = email.message_from_bytes(response_part[1])
+                mail_data['from'] = message['From']
+
+                # Decode subject của mail
+                mail_data['subject'], encoding = header.decode_header(message['Subject'])[
+                    0]
+                if isinstance(mail_data['subject'], bytes):
+                    mail_data['subject'] = mail_data['subject'].decode("utf-8")
+
+                # Lấy payload của mail
                 mail_content = message.get_payload()
 
-            # and then let's show its result
-            print(f'From: {mail_from}')
-            print(f'Subject: {mail_subject}')
-            print(f'Content: {mail_content}')
+                # Nếu payload của email có nhiều phần
+                if message.is_multipart():
+                    for data in mail_content:
+
+                        # Decode payload của các phần
+                        decoded = ''
+                        if (data['Content-Transfer-Encoding'] == 'quoted-printable'):
+                            decoded = quopri.decodestring(
+                                data.get_payload().encode()).decode('utf-8')
+
+                        else:
+                            decoded = data.get_payload(decode=True)
+
+                        # Gán các giá trị vào dict
+                        data_part['contentType'] = data.get_content_type()
+                        data_part['encodeType'] = data['Content-Transfer-Encoding']
+                        data_part['filename'] = data.get_filename()
+                        data_part['payload'] = decoded
+
+                        # Append vào list dữ liệu của mail
+                        mail_data['content'].append(data_part)
+
+                        # Reset lại dict
+                        data_part = {
+                            "contentType": None,
+                            "encodeType": None,
+                            "payload": None,
+                            "filename": None
+                        }
+
+                # Nếu payload email chỉ có 1 phần
+                else:
+                    # Gán các giá trị vào dict
+                    data_part['contentType'] = message.get_content_type()
+                    data_part['encodeType'] = message['Content-Transfer-Encoding']
+                    data_part['payload'] = message.get_payload()
+
+                    # Append vào list dữ liệu của mail
+                    mail_data['content'].append(data_part)
+
+        # Append vào danh sách mail
+        mails.append(mail_data)
+
+    # Trả về danh sách mail
+    return mails
+
+
+fetchEmail()
