@@ -9,21 +9,22 @@ from email import header
 
 SERVER = 'imap.gmail.com'
 EMAIL = "nguyen.dphux@gmail.com"
-PASSWORD = ""
+PASSWORD = "Fuckyou439*"
 
 
-LABEL = ['inbox', 'starred', 'snoozed', 'important',
-         'chats', 'sent', 'drafts', 'all', 'spam', 'trash']
+LABEL = ['Inbox', 'Starred', 'Snoozed', 'Important',
+         'Chats', 'Sent', 'Drafts', 'All', 'Spam', 'Trash']
 
 
 def fetchEmail():
     # Đăng nhập vào server
     mail = imaplib.IMAP4_SSL(SERVER)
     mail.login(EMAIL, PASSWORD)
+
     # Chọn label cần lấy mail
     mail.select('[Gmail]/Starred')
 
-    # Tìm kiếm trong hộp thư theo LABEL
+    # Tìm kiếm tất cả mail trong hộp thư theo LABEL
     status, data = mail.search(None, 'ALL')
     mails = []
     mail_ids = []
@@ -114,6 +115,7 @@ def fetchEmail():
         mails.append(mail_data)
 
     # Trả về danh sách mail
+    print(mails)
     return mails
 
 
