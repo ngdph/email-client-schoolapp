@@ -9,7 +9,6 @@ from email import header
 
 SERVER = 'imap.gmail.com'
 EMAIL = "nguyen.dphux@gmail.com"
-PASSWORD = "Fuckyou439*"
 
 
 LABEL = ['Inbox', 'Starred', 'Snoozed', 'Important',
