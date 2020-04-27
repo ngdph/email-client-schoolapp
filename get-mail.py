@@ -2,6 +2,7 @@ import email
 import imaplib
 import quopri
 import base64
+import re
 
 
 from email import header
@@ -11,21 +12,39 @@ SERVER = 'imap.gmail.com'
 EMAIL = "nhanth240500@gmail.com"
 PASSWORD = "@177687Nhan@"
 
+# Đăng nhập vào server
+mail = imaplib.IMAP4_SSL(SERVER)
+mail.login(EMAIL, PASSWORD)
 
-LABEL = ['Inbox', 'Starred', 'Snoozed', 'Important',
-         'Chats', 'Sent', 'Drafts', 'All', 'Spam', 'Trash']
+
+def getLabels():
+    # Khởi tạo label rỗng
+    TOTAL_LABELS = 0
+    LABELS = []
+
+    # Lấy hết tất cả label
+    TOTAL_LABELS = len(mail.list()[1])
+
+    # đưa label vào list
+    for i in range(0, TOTAL_LABELS):
+        LABEL = re.findall(
+            '"([^"]*)"', bytes.decode(mail.list()[1][i], 'utf-8'))[-1]
+        LABELS.append(LABEL)
+
+    return LABELS
 
 
-def fetchEmail():
-    # Đăng nhập vào server
-    mail = imaplib.IMAP4_SSL(SERVER)
-    mail.login(EMAIL, PASSWORD)
-    print(bytes.decode(mail.list()[1][0], 'utf-8'), mail.list)
+def fetchEmail(label):
+
     # Chọn label cần lấy mail
-    mail.select('"[Gmail]/Sent Mail"')
+    mail.select(f'"{label}"')
     # Tìm kiếm tất cả mail trong hộp thư theo LABEL
     status, data = mail.search(None, 'ALL')
-    mails = []
+
+    mails = {
+        'label': '',
+        'mails': []
+    }
     mail_ids = []
 
     # Lấy mail id
@@ -117,11 +136,12 @@ def fetchEmail():
                     mail_data['content'].append(data_part)
 
         # Append vào danh sách mail
-        mails.append(mail_data)
+        mails['mails'].append(mail_data)
 
     # Trả về danh sách mail
     # print(mails)
     return mails
 
 
-fetchEmail()
+labels = getLabels()
+fetchEmail(labels[-1])
