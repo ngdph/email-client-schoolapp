@@ -8,7 +8,8 @@ from email import header
 
 
 SERVER = 'imap.gmail.com'
-EMAIL = "nguyen.dphux@gmail.com"
+EMAIL = "nhanth240500@gmail.com"
+PASSWORD = "@177687Nhan@"
 
 
 LABEL = ['Inbox', 'Starred', 'Snoozed', 'Important',
@@ -19,10 +20,9 @@ def fetchEmail():
     # Đăng nhập vào server
     mail = imaplib.IMAP4_SSL(SERVER)
     mail.login(EMAIL, PASSWORD)
-
+    print(bytes.decode(mail.list()[1][0], 'utf-8'), mail.list)
     # Chọn label cần lấy mail
-    mail.select('[Gmail]/Starred')
-
+    mail.select('"[Gmail]/Sent Mail"')
     # Tìm kiếm tất cả mail trong hộp thư theo LABEL
     status, data = mail.search(None, 'ALL')
     mails = []
@@ -62,10 +62,16 @@ def fetchEmail():
                 mail_data['from'] = message['From']
 
                 # Decode subject của mail
-                mail_data['subject'], encoding = header.decode_header(message['Subject'])[
-                    0]
-                if isinstance(mail_data['subject'], bytes):
-                    mail_data['subject'] = mail_data['subject'].decode("utf-8")
+                if (message['Subject']):
+                    mail_data['subject'], encoding = header.decode_header(message['Subject'])[
+                        0]
+                    if isinstance(mail_data['subject'], bytes):
+                        mail_data['subject'] = mail_data['subject'].decode(
+                            "utf-8")
+                else:
+                    mail_data['subject'] = ''
+
+                print(mail_data['subject'])
 
                 # Lấy payload của mail
                 mail_content = message.get_payload()
@@ -114,7 +120,7 @@ def fetchEmail():
         mails.append(mail_data)
 
     # Trả về danh sách mail
-    print(mails)
+    # print(mails)
     return mails
 
 
