@@ -82,8 +82,7 @@ def fetchEmail(label):
 
                 # Decode subject của mail
                 if (message['Subject']):
-                    mail_data['subject'], encoding = header.decode_header(message['Subject'])[
-                        0]
+                    mail_data['subject'], encoding = header.decode_header(message['Subject'])[0]
                     if isinstance(mail_data['subject'], bytes):
                         mail_data['subject'] = mail_data['subject'].decode(
                             "utf-8")
