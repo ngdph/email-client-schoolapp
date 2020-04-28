@@ -2,38 +2,75 @@ import email
 import imaplib
 import quopri
 import base64
+import re
 
 
 from email import header
 
 
 SERVER = 'imap.gmail.com'
-EMAIL = "nguyen.dphux@gmail.com"
+EMAIL = "nhanth240500@gmail.com"
+PASSWORD = "@177687Nhan@"
+
+# Đăng nhập vào server
+mail = imaplib.IMAP4_SSL(SERVER)
+mail.login(EMAIL, PASSWORD)
 
 
-LABEL = ['Inbox', 'Starred', 'Snoozed', 'Important',
-         'Chats', 'Sent', 'Drafts', 'All', 'Spam', 'Trash']
+def getLabels():
+    # Khởi tạo label rỗng
+    TOTAL_LABELS = 0
+    LABELS = []
+
+    # Lấy hết tất cả label
+    RAW_LABELS = mail.list()[1]
+    TOTAL_LABELS = len(mail.list()[1])
+
+    # mail.list() trả về 1 tuple có 2 phần tử
+    # Example: ('OK', [b'(\\HasNoChildren) "/" "INBOX"', b'(\\HasChildren \\Noselect) "/" "[Gmail]"', b'(\\All \\HasNoChildren) "/" "[Gmail]/All Mail"', b'(\\HasNoChildren \\Trash) "/" "[Gmail]/Bin"', b'(\\Drafts \\HasNoChildren) "/" "[Gmail]/Drafts"', b'(\\HasNoChildren \\Important) "/" "[Gmail]/Important"', b'(\\HasNoChildren \\Sent) "/" "[Gmail]/Sent Mail"', b'(\\HasNoChildren \\Junk) "/" "[Gmail]/Spam"', b'(\\Flagged \\HasNoChildren) "/" "[Gmail]/Starred"'])
+    # Phần tử thứ 1 là trạng thái, thứ 2 là list các label dưới dạng byte
+    # => Phải bytes.decode từng phần tử trong list để lấy được chuỗi
+    # => Lọc ra label thích hợp và append vào list
+    # Example: ['INBOX', '[Gmail]', '[Gmail]/All Mail', '[Gmail]/Bin', '[Gmail]/Drafts', '[Gmail]/Important', '[Gmail]/Sent Mail', '[Gmail]/Spam', '[Gmail]/Starred']
+
+    # đưa label vào list
+    for i in range(0, TOTAL_LABELS):
+        # LABEL là 1 chuỗi đã qua xử lý với đoạn regex để lấy được phần label
+        LABEL = re.findall(
+            '"([^"]*)"', bytes.decode(RAW_LABELS[i], 'utf-8'))[-1]
+
+        # re.findall sẽ trả về list ['/', 'INBOX'] với INBOX là tên label tương ứng với chuỗi xử lý, vì ở cuối nên ta để index là [-1] để lấy phần tử cuối
+        LABELS.append(LABEL)
+    return LABELS
 
 
-def fetchEmail():
-    # Đăng nhập vào server
-    mail = imaplib.IMAP4_SSL(SERVER)
-    mail.login(EMAIL, PASSWORD)
+def fetchEmail(label):
 
     # Chọn label cần lấy mail
-    mail.select('[Gmail]/Starred')
+    # f là để truyền biến vào chuỗi qua {}
+    mail.select(f'"{label}"')
 
     # Tìm kiếm tất cả mail trong hộp thư theo LABEL
+    # Search trả về 1 tuple với 2 phần tử là trạng thái và list chứa 1 phần tử là dãy byte chứa id của mail
     status, data = mail.search(None, 'ALL')
-    mails = []
+
+    mails = {
+        'label': '',
+        'mails': []
+    }
     mail_ids = []
 
-    # Lấy mail id
+    # data là list chỉ chứa 1 phần tử là 1 dãy byte là các id của mail nên vòng for cũng chỉ là duyệt 1 vòng
+    # block.split() là để trả về list chứa từng phẩn tử của dãy byte đó
+    # => mail_ids += block.split() không khác gì mail_ids = block.split(), chỉ là gán list chứa phần tử cho list rỗng
     for block in data:
-        mail_ids += block.split()
+        mail_ids = block.split()
 
-    # Duyệt qua từng id của mail và lấy mail về
+    # return
+    # Duyệt qua từng id của mail và lấy mail về, đồng thời xử lý mail đó
     for i in mail_ids:
+        # fetch trả về tuple 2 phần tử là status và list các response được trả về từ server
+        # Gán data là reponse được trả về từ server
         status, data = mail.fetch(i, '(RFC822)')
 
         # Khởi tạo dictionary chứa dữ liệu mail rỗng
@@ -42,11 +79,14 @@ def fetchEmail():
             'subject': None,
             'content': []
         }
-
         # Duyệt qua các thành phần của mail
         for response_part in data:
 
             # Khởi tạo dict chứa dữ liệu content của mail
+            # contentType: kiểu dữ liệu (chuỗi)
+            # encodeType: kiểu encode (chuỗi)
+            # payload: dữ liệu (chuỗi hoặc byte)
+            # filename: tên file của phần file đính kèm(nếu có) (chuỗi), nếu chỉ là phần nội dung mail thì phần này sẽ là None
             data_part = {
                 "contentType": None,
                 "encodeType": None,
@@ -54,33 +94,49 @@ def fetchEmail():
                 "filename": None
             }
 
-            # Nếu dữ liệu là tuple thì xét
+            # Nếu dữ liệu là tuple thì xét tiếp vì có chứa dữ liệu
             if isinstance(response_part, tuple):
 
                 # Lấy From và Subject của mail
+                # response_part chứa 2 phần tử là định dạng của mail và byte dữ liệu nên ta chọn [1]
                 message = email.message_from_bytes(response_part[1])
-                mail_data['from'] = message['From']
 
+                # Lấy người gửi
+                mail_data['from'] = message['From']
                 # Decode subject của mail
-                mail_data['subject'], encoding = header.decode_header(message['Subject'])[
-                    0]
-                if isinstance(mail_data['subject'], bytes):
-                    mail_data['subject'] = mail_data['subject'].decode("utf-8")
+                # Lấy tiêu đề, vì tiêu đề cũng có thể viết bằng nhiều ngôn ngữ nên phải được decode
+                if (message['Subject']):
+                    # decode_header trả về list với 2 phần tử là tiêu đề và kiểu encode nên ta chọn [0]
+                    mail_data['subject'], encoding = header.decode_header(message['Subject'])[
+                        0]
+
+                    # Nếu tiêu đề trả về là dạng bytes thì phải decode ra
+                    if isinstance(mail_data['subject'], bytes):
+                        mail_data['subject'] = mail_data['subject'].decode(
+                            "utf-8")
+                else:
+                    # Trường hợp tiêu đề rỗng
+                    mail_data['subject'] = ''
 
                 # Lấy payload của mail
+                # payload chứa nội dung, file đính kèm, v.v....
+                # Nội dung, file... đều được tách riêng trong payload nên ta phải duyệt qua để xử lý
                 mail_content = message.get_payload()
 
                 # Nếu payload của email có nhiều phần
                 if message.is_multipart():
+                    # Duyệt qua từng phần của nội dung mail
                     for data in mail_content:
 
+                        decoded = data.get_payload()
                         # Decode payload của các phần
-                        decoded = ''
+                        # Ở đây xử lý để payload nếu là chuỗi thì trả về string, nếu là base64 sẽ trả về hex dưới dạng byte
+
                         if (data['Content-Transfer-Encoding'] == 'quoted-printable'):
                             decoded = quopri.decodestring(
                                 data.get_payload().encode()).decode('utf-8')
 
-                        else:
+                        if (data['Content-Transfer-Encoding'] == 'base64'):
                             decoded = data.get_payload(decode=True)
 
                         # Gán các giá trị vào dict
@@ -111,11 +167,12 @@ def fetchEmail():
                     mail_data['content'].append(data_part)
 
         # Append vào danh sách mail
-        mails.append(mail_data)
+        mails['mails'].append(mail_data)
 
     # Trả về danh sách mail
     print(mails)
     return mails
 
 
-fetchEmail()
+labels = getLabels()
+fetchEmail(labels[-3])
