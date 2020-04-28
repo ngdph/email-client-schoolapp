@@ -36,4 +36,4 @@ lbRead.place(x=5,y=110)
 #button Logout quay lại tab Login	
 Logout = Button (Option,text="Logout",command=clickedLogout)
 Logout.place(x=240,y=160)
-
+Option.mainloop()
