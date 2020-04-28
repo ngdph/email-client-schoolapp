@@ -51,6 +51,7 @@ def fetchEmail(label):
     mail.select(f'"{label}"')
 
     # Tìm kiếm tất cả mail trong hộp thư theo LABEL
+    # Search trả về 1 tuple với 2 phần tử là trạng thái và list chứa 1 phần tử là dãy byte chứa id của mail
     status, data = mail.search(None, 'ALL')
 
     mails = {
@@ -174,4 +175,4 @@ def fetchEmail(label):
 
 
 labels = getLabels()
-fetchEmail(labels[-2])
+fetchEmail(labels[-3])
