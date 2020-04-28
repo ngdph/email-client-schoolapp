@@ -56,6 +56,9 @@ def fetchEmail(label):
 
     # Tìm kiếm tất cả mail trong hộp thư theo LABEL
     # Search trả về 1 tuple với 2 phần tử là trạng thái và list chứa 1 phần tử là dãy byte chứa id của mail
+    # Search nhận 2 tham số là charset (từ khoá tìm kiếm) và criteria (chuẩn tìm kiếm)
+    # Tham khảo https://gist.github.com/martinrusev/6121028
+    # Dưới đây search(None, 'ALL') là không tìm theo từ khoá và chọn tất cả mail trong label
     status, data = mail.search(None, 'ALL')
 
     mails = {
