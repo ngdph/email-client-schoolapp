@@ -7,10 +7,12 @@ import re
 
 from email import header
 
+import info
 
-SERVER = 'imap.gmail.com'
-EMAIL = "nhanth240500@gmail.com"
-PASSWORD = "@177687Nhan@"
+
+SERVER = "imap.gmail.com"
+EMAIL = info.EMAIL
+PASSWORD = info.PASSWORD
 
 # Đăng nhập vào server
 mail = imaplib.IMAP4_SSL(SERVER)
@@ -40,8 +42,7 @@ def getLabels():
     # đưa label vào list
     for i in range(0, TOTAL_LABELS):
         # LABEL là 1 chuỗi đã qua xử lý với đoạn regex để lấy được phần label
-        LABEL = re.findall(
-            '"([^"]*)"', bytes.decode(RAW_LABELS[i], 'utf-8'))[-1]
+        LABEL = re.findall('"([^"]*)"', bytes.decode(RAW_LABELS[i], "utf-8"))[-1]
 
         # re.findall sẽ trả về list ['/', 'INBOX'] với INBOX là tên label tương ứng với chuỗi xử lý, vì ở cuối nên ta để index là [-1] để lấy phần tử cuối
         LABELS.append(LABEL)
@@ -59,12 +60,9 @@ def fetchEmail(label):
     # Search nhận 2 tham số là charset (từ khoá tìm kiếm) và criteria (chuẩn tìm kiếm)
     # Tham khảo https://gist.github.com/martinrusev/6121028
     # Dưới đây search(None, 'ALL') là không tìm theo từ khoá và chọn tất cả mail trong label
-    status, data = mail.search(None, 'ALL')
+    status, data = mail.search(None, "ALL")
 
-    mails = {
-        'label': '',
-        'mails': []
-    }
+    mails = {"label": "", "mails": []}
     mail_ids = []
 
     # data là list chỉ chứa 1 phần tử là 1 dãy byte là các id của mail nên vòng for cũng chỉ là duyệt 1 vòng
@@ -78,14 +76,10 @@ def fetchEmail(label):
     for i in mail_ids:
         # fetch trả về tuple 2 phần tử là status và list các response được trả về từ server
         # Gán data là reponse được trả về từ server
-        status, data = mail.fetch(i, '(RFC822)')
+        status, data = mail.fetch(i, "(RFC822)")
 
         # Khởi tạo dictionary chứa dữ liệu mail rỗng
-        mail_data = {
-            'from': None,
-            'subject': None,
-            'content': []
-        }
+        mail_data = {"from": None, "subject": None, "content": []}
         # Duyệt qua các thành phần của mail
         for response_part in data:
 
@@ -98,7 +92,7 @@ def fetchEmail(label):
                 "contentType": None,
                 "encodeType": None,
                 "payload": None,
-                "filename": None
+                "filename": None,
             }
 
             # Nếu dữ liệu là tuple thì xét tiếp vì có chứa dữ liệu
@@ -109,21 +103,21 @@ def fetchEmail(label):
                 message = email.message_from_bytes(response_part[1])
 
                 # Lấy người gửi
-                mail_data['from'] = message['From']
+                mail_data["from"] = message["From"]
                 # Decode subject của mail
                 # Lấy tiêu đề, vì tiêu đề cũng có thể viết bằng nhiều ngôn ngữ nên phải được decode
-                if (message['Subject']):
+                if message["Subject"]:
                     # decode_header trả về list với 2 phần tử là tiêu đề và kiểu encode nên ta chọn [0]
-                    mail_data['subject'], encoding = header.decode_header(message['Subject'])[
-                        0]
+                    mail_data["subject"], encoding = header.decode_header(
+                        message["Subject"]
+                    )[0]
 
                     # Nếu tiêu đề trả về là dạng bytes thì phải decode ra
-                    if isinstance(mail_data['subject'], bytes):
-                        mail_data['subject'] = mail_data['subject'].decode(
-                            "utf-8")
+                    if isinstance(mail_data["subject"], bytes):
+                        mail_data["subject"] = mail_data["subject"].decode("utf-8")
                 else:
                     # Trường hợp tiêu đề rỗng
-                    mail_data['subject'] = ''
+                    mail_data["subject"] = ""
 
                 # Lấy payload của mail
                 # payload chứa nội dung, file đính kèm, v.v....
@@ -135,46 +129,46 @@ def fetchEmail(label):
                     # Duyệt qua từng phần của nội dung mail
                     for data in mail_content:
 
-                        decoded = data.get_payload()
+                        decoded = data.get_payload(decode=True)
                         # Decode payload của các phần
                         # Ở đây xử lý để payload nếu là chuỗi thì trả về string, nếu là base64 sẽ trả về hex dưới dạng byte
 
-                        if (data['Content-Transfer-Encoding'] == 'quoted-printable'):
-                            decoded = quopri.decodestring(
-                                data.get_payload().encode()).decode('utf-8')
+                        # if (data['Content-Transfer-Encoding'] == 'quoted-printable'):
+                        #     decoded = quopri.decodestring(
+                        #         data.get_payload().encode()).decode('utf-8')
 
-                        if (data['Content-Transfer-Encoding'] == 'base64'):
-                            decoded = data.get_payload(decode=True)
+                        # if (data['Content-Transfer-Encoding'] == 'base64'):
+                        #     decoded = data.get_payload(decode=True)
 
                         # Gán các giá trị vào dict
-                        data_part['contentType'] = data.get_content_type()
-                        data_part['encodeType'] = data['Content-Transfer-Encoding']
-                        data_part['filename'] = data.get_filename()
-                        data_part['payload'] = decoded
+                        data_part["contentType"] = data.get_content_type()
+                        data_part["encodeType"] = data["Content-Transfer-Encoding"]
+                        data_part["filename"] = data.get_filename()
+                        data_part["payload"] = decoded
 
                         # Append vào list dữ liệu của mail
-                        mail_data['content'].append(data_part)
+                        mail_data["content"].append(data_part)
 
                         # Reset lại dict
                         data_part = {
                             "contentType": None,
                             "encodeType": None,
                             "payload": None,
-                            "filename": None
+                            "filename": None,
                         }
 
                 # Nếu payload email chỉ có 1 phần
                 else:
                     # Gán các giá trị vào dict
-                    data_part['contentType'] = message.get_content_type()
-                    data_part['encodeType'] = message['Content-Transfer-Encoding']
-                    data_part['payload'] = message.get_payload()
+                    data_part["contentType"] = message.get_content_type()
+                    data_part["encodeType"] = message["Content-Transfer-Encoding"]
+                    data_part["payload"] = message.get_payload()
 
                     # Append vào list dữ liệu của mail
-                    mail_data['content'].append(data_part)
+                    mail_data["content"].append(data_part)
 
         # Append vào danh sách mail
-        mails['mails'].append(mail_data)
+        mails["mails"].append(mail_data)
 
     # Trả về danh sách mail
     print(mails)
@@ -182,4 +176,5 @@ def fetchEmail(label):
 
 
 labels = getLabels()
-fetchEmail(labels[-3])
+print(labels)
+fetchEmail("[Gmail]/Starred")
