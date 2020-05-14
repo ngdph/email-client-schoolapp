@@ -32,9 +32,6 @@ def Login_Gmail(username, password):
     user.setUsername(username)
     user.setPassword(password)
 
-    print(user.getUsername(), user.getPassword(), 1234)
-    # global user, password
-
     obj = login(user.getUsername(), user.getPassword())
     if obj is not False:
         messagebox.showinfo("Thông báo", "Đăng nhập thành công")
