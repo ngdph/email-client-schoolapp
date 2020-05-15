@@ -1,8 +1,10 @@
 from Crypto.Cipher import AES
+from Crypto.Util import Padding
 
 
 def padding(s):
-    return s.encode("utf-8") + b"{" * (16 - len(s) % 16)
+    return Padding.pad(s.encode("utf-8"), 16, style="pkcs7")
+    #  s.encode("utf-8") + b"{" * (16 - len(s) % 16)
 
 
 def Encrypt_AES(plaintext, key):
