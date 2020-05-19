@@ -24,7 +24,7 @@ def RSA_Decrypt(ciphertext, key):
 
 plaintext = "Tien ngu lon"
 key = RSA.generate(2048)
-ciphertext = rsa_encrypt(plaintext, key)
+ciphertext = RSA_Encrypt(plaintext, key)
 print("ciphertext ", ciphertext)
-plain = rsa_decrypt(ciphertext, key)
+plain = RSA_Decrypt(ciphertext, key)
 print("plain ", plain)
