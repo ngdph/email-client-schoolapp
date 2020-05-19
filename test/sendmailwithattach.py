@@ -7,6 +7,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+from cryptor import *
 
 # from email import encoders
 
@@ -39,6 +40,8 @@ def Send_mail_with_attachment(
             if message != "":
                 # Message của người gửi muốn người nhận nhận được
                 body_mail = message
+                print(body_mail)
+                # body_mail = cryptor.
 
                 # Định dạng message của mail theo kiểu plain text và lưu vào message_mail
                 message_mail = MIMEText(body_mail, "plain", "utf-8")
