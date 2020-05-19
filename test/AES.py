@@ -11,18 +11,18 @@ class AES_Cryptography:
     def unpad(self, cipherbytes, block_size, style):
         return Padding.unpad(cipherbytes, block_size, style)
 
-    def encrypt(self, plaintext, key, iv):
+    def AES_Encrypt(self, plaintext, key, iv):
         cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
-        ciphertext = cipher.encrypt(pad(plaintext.encode(), 16, "pkcs7"))
+        ciphertext = cipher.encrypt(self.pad(plaintext.encode(), 16, "pkcs7"))
 
         result = base64.b64encode(ciphertext).decode()
         return result
 
-    def decrypt(self, ciphertext, key, iv):
+    def AES_Decrypt(self, ciphertext, key, iv):
         text = base64.b64decode(ciphertext)
 
         cipher = AES.new(key.encode(), AES.MODE_CBC, iv.encode())
         plaintext = cipher.decrypt(text)
 
-        result = unpad(plaintext, 16, "pkcs7").decode()
+        result = self.unpad(plaintext, 16, "pkcs7").decode()
         return result

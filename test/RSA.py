@@ -3,7 +3,7 @@ from Crypto import Random
 from Crypto.Cipher import PKCS1_OAEP
 
 
-def rsa_encrypt(plaintext, key):
+def RSA_Encrypt(plaintext, key):
     public_key = key.publickey().exportKey("PEM")
     plaintext = str.encode(plaintext)
 
@@ -14,7 +14,7 @@ def rsa_encrypt(plaintext, key):
     return encrypted_text
 
 
-def rsa_decrypt(ciphertext, key):
+def RSA_Decrypt(ciphertext, key):
     private_key = key.export_key("PEM")
     rsa_private_key = RSA.importKey(private_key)
     rsa_private_key = PKCS1_OAEP.new(rsa_private_key)
