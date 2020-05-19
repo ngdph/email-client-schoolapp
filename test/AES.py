@@ -4,7 +4,7 @@ from Crypto.Util import Padding
 import base64
 
 
-class AES:
+class AES_Cryptography:
     def pad(self, plainbytes, block_size, style):
         return Padding.pad(plainbytes, block_size, style)
 
