@@ -2,11 +2,6 @@ from tkinter import *
 import webbrowser
 from tkinter import Menu
 from tkinter import messagebox
-from option import showoption
-
-
-# IDtxt = "none"
-# Passtxt = "none"
 
 
 class Email:
@@ -37,6 +32,15 @@ class Email:
             return False
 
 
+# form login
+Login = Tk()
+Login.geometry("500x200")
+Login.title("Login")
+
+# khai báo biến cho ID và pass
+send_email = StringVar()
+send_pass = StringVar()
+
 # tạo ô about
 def About():
     messagebox.showinfo(
@@ -45,91 +49,98 @@ def About():
     )
 
 
-class authenticate:
-    def __init__(self, Login):
-        # form login
-        Login.geometry("500x200")
-        Login.title("Login")
+about = Menu(Login)
+about.add_command(label="About", command=About)
+Login.config(menu=about)
 
-        # menubar about
-        """self.about = Menu(Login)
-        self.about.add_command(label="About", command=About)
-        Login.config(menu=about)"""
 
-        # tạo và place Label ID và pass
-        self.senderID = Label(Login, text="Gmail ID: ", font=("Arial", 10))
-        self.senderPass = Label(Login, text="Gmail Pass: ", font=("Arial", 10))
-        self.senderID.place(x=100, y=10)
-        self.senderPass.place(x=100, y=50)
+# tạo và place Label ID và pass
+senderID = Label(Login, text="Gmail ID: ", font=("Arial", 10))
+senderPass = Label(Login, text="Gmail Pass: ", font=("Arial", 10))
+senderID.place(x=100, y=10)
+senderPass.place(x=100, y=50)
 
-        # tạo ô nhập ID
-        self.IDtxt = Entry(Login)
+# tạo place holder và chỗ nhập ID
+IDtxt = Entry(Login, textvariable=send_email)
+IDtxt.insert(0, "Mail người gửi")
+IDtxt.configure(state=DISABLED)
 
-        # tạo ô nhập pass
-        self.Passtxt = Entry(Login, show="*")
 
-        # place ô ID và Pass
-        self.IDtxt.place(x=250, y=10, width=200)
-        self.Passtxt.place(x=250, y=50, width=200)
+def on_click_id(event):
+    IDtxt.configure(state=NORMAL)
+    IDtxt.delete(0, END)
+    # ko bị mất khi bấm lại
+    IDtxt.unbind("<Button-1>", on_click_ID)
 
-        # make connection toi Gmail
-        self.LoginBtn = Button(Login, text="Đăng nhập", command=self.make_connection)
-        self.LoginBtn.place(x=200, y=100)
 
-        # label please turn on less secure app on Gmail before login
-        self.trn = Label(
-            Login, text="please turn on less secure app on Gmail before login", fg="red"
+on_click_ID = IDtxt.bind("<Button-1>", on_click_id)
+
+# tạo place holder và chỗ nhập pass
+Passtxt = Entry(Login)
+Passtxt.insert(0, "Mật khẩu mail")
+Passtxt.configure(state=DISABLED)
+
+
+def on_click_ps(event):
+    Passtxt2 = Entry(Login, textvariable=send_pass, show="*")
+    Passtxt2.place(x=250, y=50, width=200)
+    Passtxt2.focus()
+    # ko bị mất khi bấm lại
+    Passtxt.unbind("<Button-1>", on_click_pass)
+
+
+on_click_pass = Passtxt.bind("<Button-1>", on_click_ps)
+
+# place ô ID và Pass
+IDtxt.place(x=250, y=10, width=200)
+Passtxt.place(x=250, y=50, width=200)
+
+
+# make connection toi Gmail
+def make_connection():
+
+    user = send_email.get()
+    password = send_pass.get()
+    client = "Gmail"
+    connect = Email(user, password, client)
+
+    x = connect.login()
+    if x is not False:
+        messagebox.showinfo("Thông báo", "Đăng nhập thành công")
+        Login.destroy()
+        import option
+    else:
+        messagebox.showerror(
+            "Connection Fail, try again", "Tài khoản hoặc mật khẩu không hợp lệ"
         )
-        self.trn.place(x=100, y=130)
-
-        def browser_Warning(url):
-            webbrowser.open_new(url)
-
-        self.hyperlink_Warning = Label(Login, text="at here", fg="blue", cursor="hand2")
-        self.hyperlink_Warning.place(x=349, y=130)
-        self.hyperlink_Warning.bind(
-            "<Button-1>",
-            lambda e: browser_Warning(
-                "https://myaccount.google.com/u/0/lesssecureapps?pli=1"
-            ),
-        )
-        # label để đăng ký
-        self.signin = Label(Login, text="Chưa có tài khoản? Đăng ký")
-        self.signin.place(x=150, y=150)
-        # lấy hyper link
-        def browser_SignUp(url):
-            webbrowser.open_new(url)
-
-        self.hyperlink_SignUp = Label(Login, text="tại đây", fg="blue", cursor="hand2")
-        self.hyperlink_SignUp.place(x=300, y=150)
-        self.hyperlink_SignUp.bind(
-            "<Button-1>",
-            lambda e: browser_SignUp(
-                "https://accounts.google.com/signup/v2/webcreateaccount?service=mail&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ltmpl=default&gmb=exp&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp"
-            ),
-        )
-        self.Login = Login
-
-    def make_connection(self):
-
-        user = self.IDtxt.get()
-        password = self.Passtxt.get()
-        client = "Gmail"
-        connect = Email("nguyen.dphux@gmail.com", "Ilovesex123*", client)
-        # print(client, user, password)
-        x = connect.login()
-        # connect.event()
-        if x is not False:
-            messagebox.showinfo("Thông báo", "Đăng nhập thành công")
-            self.Login.destroy()
-            showoption(user, password)
-        else:
-            messagebox.showerror(
-                "Connection Fail, try again", "Tài khoản hoặc mật khẩu không hợp lệ"
-            )
 
 
-if __name__ == "__main__":
-    root = Tk()
-    auth = authenticate(root)
-    root.mainloop()
+# tạo button Login
+LoginBtn = Button(Login, text="Đăng nhập", command=make_connection)
+LoginBtn.place(x=200, y=100)
+
+
+# label please turn on less secure app on Gmail before login
+trn = Label(
+    Login, text="please turn on less secure app on Gmail before login", fg="red"
+)
+trn.place(x=100, y=130)
+
+# label để đăng ký
+signin = Label(Login, text="Chưa có tài khoản? Đăng ký")
+signin.place(x=150, y=150)
+# lấy hyper link
+def callback(url):
+    webbrowser.open_new(url)
+
+
+hyperlink = Label(Login, text="tại đây", fg="blue", cursor="hand2")
+hyperlink.place(x=300, y=150)
+hyperlink.bind(
+    "<Button-1>",
+    lambda e: callback(
+        "https://accounts.google.com/signup/v2/webcreateaccount?service=mail&continue=https%3A%2F%2Fmail.google.com%2Fmail%2F&ltmpl=default&gmb=exp&biz=false&flowName=GlifWebSignIn&flowEntry=SignUp"
+    ),
+)
+
+Login.mainloop()

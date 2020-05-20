@@ -7,12 +7,11 @@ import re
 
 from email import header
 
-import info
 
 
 SERVER = "imap.gmail.com"
-EMAIL = info.EMAIL
-PASSWORD = info.PASSWORD
+EMAIL = "nguyen.dphux@gmail.com"
+PASSWORD = "Ilovesex123*"
 
 # Đăng nhập vào server
 mail = imaplib.IMAP4_SSL(SERVER)
@@ -63,6 +62,8 @@ def fetchEmail(label):
     status, data = mail.search(None, "ALL")
 
     mails = {"label": "", "mails": []}
+    mails["label"] = label
+
     mail_ids = []
 
     # data là list chỉ chứa 1 phần tử là 1 dãy byte là các id của mail nên vòng for cũng chỉ là duyệt 1 vòng
@@ -146,6 +147,18 @@ def fetchEmail(label):
                         data_part["filename"] = data.get_filename()
                         data_part["payload"] = decoded
 
+                        filename = ""
+
+                        if data_part["filename"]:
+                            filename = data_part["filename"].split("\\")[-1]
+                        else:
+                            filename = None
+
+                        # print(filename.split("\\")[-1])
+
+                        # with open(filename.split("\\")[-1], "wb") as f:
+                        #     f.write(decoded)
+
                         # Append vào list dữ liệu của mail
                         mail_data["content"].append(data_part)
 
@@ -163,7 +176,6 @@ def fetchEmail(label):
                     data_part["contentType"] = message.get_content_type()
                     data_part["encodeType"] = message["Content-Transfer-Encoding"]
                     data_part["payload"] = message.get_payload()
-
                     # Append vào list dữ liệu của mail
                     mail_data["content"].append(data_part)
 
@@ -171,10 +183,10 @@ def fetchEmail(label):
         mails["mails"].append(mail_data)
 
     # Trả về danh sách mail
-    print(mails)
+    # print(mails)
     return mails
 
 
 labels = getLabels()
-print(labels)
+print(labels, type(labels))
 fetchEmail("[Gmail]/Starred")
