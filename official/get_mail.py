@@ -8,7 +8,6 @@ import re
 from email import header
 
 
-
 SERVER = "imap.gmail.com"
 EMAIL = "nguyen.dphux@gmail.com"
 PASSWORD = "Ilovesex123*"
@@ -45,7 +44,8 @@ def getLabels():
 
         # re.findall sẽ trả về list ['/', 'INBOX'] với INBOX là tên label tương ứng với chuỗi xử lý, vì ở cuối nên ta để index là [-1] để lấy phần tử cuối
         LABELS.append(LABEL)
-    return LABELS
+
+    return LABELS[2:]
 
 
 def fetchEmail(label):

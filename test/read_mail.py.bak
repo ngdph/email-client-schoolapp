@@ -1,0 +1,65 @@
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import filedialog
+from get_mail import getLabels, fetchEmail
+
+
+def showreadmail(username, password):
+    label_index = 0
+    label = ""
+    mails = []
+
+    def fetchMails():
+        print(label)
+        mails = fetchEmail(label)
+
+        return mails["mails"]
+
+    def jumpViewMail(event):
+        label_index = listLabels.curselection()[0]
+        label = listLabels.get(label_index)
+
+        mails = fetchMails()
+        index = 0
+        for  mail in mails:
+            mails.append(mail)
+            listMails.insert(index, mail["subject"])
+            index += 1
+
+    def SlcBack():
+        import option
+
+        ReadMail.destroy()
+        option.showoption(username, password)
+
+    ReadMail = Tk()
+    ReadMail.title("Đọc Mail")
+    ReadMail.geometry("700x400")
+    ReadMail.resizable(0, 0)
+
+    lbLabels = Label(ReadMail, text="Labels")
+    lbLabels.place(x=10, y=10)
+
+    labels = getLabels()
+
+    # list label
+    listLabels = Listbox(ReadMail, selectborderwidth=6, font=("Times New Roman", 12))
+    listLabels.place(x=10, y=30)
+
+    # for loop inserts label to listbox
+    for (index, lb) in enumerate(labels):
+        print(index, label)
+        listLabels.insert(index, f"{lb}")
+
+    listLabels.bind("<Double-Button-1>", jumpViewMail)
+
+    lbMails = Label(ReadMail, text="Mails")
+    lbMails.place(x=60, y=10)
+
+    listMails = Listbox(
+        ReadMail, selectborderwidth=6, font=("Times New Roman", 12), width=55
+    )
+    listMails.place(x=210, y=30)
+
+
+# showreadmail("18520165@gm.uit.edu.vn", "1634608674")
