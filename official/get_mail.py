@@ -74,7 +74,7 @@ def fetchEmail(label):
 
     # return
     # Duyệt qua từng id của mail và lấy mail về, đồng thời xử lý mail đó
-    for i in mail_ids:
+    for i in mail_ids[::-1][:7]:
         # fetch trả về tuple 2 phần tử là status và list các response được trả về từ server
         # Gán data là reponse được trả về từ server
         status, data = mail.fetch(i, "(RFC822)")
@@ -94,6 +94,7 @@ def fetchEmail(label):
                 "encodeType": None,
                 "payload": None,
                 "filename": None,
+                "to": None,
             }
 
             # Nếu dữ liệu là tuple thì xét tiếp vì có chứa dữ liệu
@@ -105,6 +106,10 @@ def fetchEmail(label):
 
                 # Lấy người gửi
                 mail_data["from"] = message["From"]
+
+                # Lấy người nhận
+                mail_data["to"] = message["To"]
+                
                 # Decode subject của mail
                 # Lấy tiêu đề, vì tiêu đề cũng có thể viết bằng nhiều ngôn ngữ nên phải được decode
                 if message["Subject"]:

@@ -2,11 +2,13 @@ from tkinter import *
 from tkinter.ttk import *
 from tkinter import filedialog
 from get_mail import getLabels, fetchEmail
+from view_detail import view_mail
 
 
 def showreadmail(username, password):
     labels = getLabels()
     label_index = 0
+    selected_mail_index = 0
     mails = []
 
     # Get mail
@@ -15,8 +17,8 @@ def showreadmail(username, password):
         index = 0
 
         # Append mail subject to list box subject
-        for mail in temp_mails[::-1]:
-            mails.append(mail["subject"])
+        for mail in temp_mails:
+            mails.append(mail)
 
             mail_subject = ""
             if mail["subject"]:
@@ -39,6 +41,10 @@ def showreadmail(username, password):
 
         ReadMail.destroy()
         option.showoption(username, password)
+
+    def viewEmail(event):
+        selected_mail_index = listMails.curselection()[0]
+        view_mail(mails[selected_mail_index])
 
     # instance of tk
     ReadMail = Tk()
@@ -72,4 +78,5 @@ def showreadmail(username, password):
     )
     listMails.place(x=210, y=30)
 
-
+    # Bind view mail function to mail subject
+    listMails.bind("<Double-Button-1>", viewEmail)
