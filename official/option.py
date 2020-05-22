@@ -1,6 +1,6 @@
 from tkinter import *
 from SendMail import showsendmail
-from abcdef import showreadmail
+from read_mail import showreadmail
 
 
 def showoption(username, password):
