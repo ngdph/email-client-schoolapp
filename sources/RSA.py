@@ -22,9 +22,9 @@ def RSA_Decrypt(ciphertext, key):
     return decrypted_text
 
 
-plaintext = "Tien ngu lon"
-key = RSA.generate(2048)
-ciphertext = RSA_Encrypt(plaintext, key)
-print("ciphertext ", ciphertext)
-plain = RSA_Decrypt(ciphertext, key)
-print("plain ", plain)
+# plaintext = "Tien ngu lon"
+# key = RSA.generate(2048)
+# ciphertext = RSA_Encrypt(plaintext, key)
+# print("ciphertext ", ciphertext)
+# plain = RSA_Decrypt(ciphertext, key)
+# print("plain ", plain)

@@ -1,18 +1,91 @@
-import smtplib, email
-import base64
-import os
-from tkinter import messagebox
+from tkinter import *
+from tkinter.ttk import *
+from tkinter import filedialog, messagebox
+
 from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+import smtplib, email, base64, os
+
 from AES import *
 
-# from email import encoders
+
+def display_send_mail(username, password):
+    GUI_send_mail = Tk()
+    GUI_send_mail.title("Gửi Mail")
+    GUI_send_mail.geometry("400x300")
+
+    def event_pressed_back():
+        GUI_send_mail.destroy()
+        import navigation
+
+        navigation.display_navigation(username, password)
+
+    def event_pressed_send():
+        send_mail_func(
+            username,
+            password,
+            entry_to.get(),
+            entry_subject.get(),
+            entry_message.get(),
+            filepaths.get().split(", "),
+        )
+
+    #### Nhóm "Mail người nhận"
+    # Label "To"
+    label_to = Label(GUI_send_mail, text="To:")
+    label_to.place(x=50, y=10)
+    # Entry "To"
+    entry_to = Entry(GUI_send_mail)
+    entry_to.place(x=100, y=10, width=200)
+
+    #### Nhóm "Subject"
+    # Label "Subject"
+    label_subject = Label(GUI_send_mail, text="Subject:")
+    label_subject.place(x=50, y=35)
+    # Entry "Subject"
+    entry_subject = Entry(GUI_send_mail)
+    entry_subject.place(x=100, y=35, width=200)
+
+    ### Nhóm "message"
+    # Label "message"
+    label_message = Label(GUI_send_mail, text="Message:")
+    label_message.place(x=48, y=70)
+    # Entry "Message"
+    entry_message = Entry(GUI_send_mail)
+    entry_message.place(x=100, y=70, width=200, height=150)
+
+    ###nhóm "chọn file"
+    ###event_pressed_send "chọn file"
+    def event_select_file():
+        file_path = filedialog.askopenfilenames(
+            parent=GUI_send_mail, title="Choose a file"
+        )
+        filepaths.configure(state=NORMAL)
+        filepaths.insert(0, ", ".join(file_path))
+
+    # button "chọn file"
+    button_file = Button(GUI_send_mail, text="Gủi file", command=event_select_file)
+    button_file.place(x=80, y=260)
+    filepaths = Entry(GUI_send_mail, state=DISABLED)
+    filepaths.place(x=10, y=240)
+
+    # Button send
+    button_send = Button(GUI_send_mail, text="Send", command=event_pressed_send)
+    button_send.place(x=150, y=260)
+
+    ### button để quay lại tab navigation
+    button_back = Button(GUI_send_mail, text="Back", command=event_pressed_back)
+    button_back.place(x=300, y=260)
+    # GUI_send_mail.mainloop()
 
 
-def Send_mail_with_attachment(
+# display_send_mail("18520165@gm.uit.edu.vn", "1634608674")
+
+
+def send_mail_func(
     username, password, receiver_email="", Subject="", message="", list_file=[],
 ):
     port = 587
@@ -99,13 +172,13 @@ def Send_mail_with_attachment(
                 print(e)
 
             finally:
-                messagebox.showinfo("Thong bao", "Da gui!")
+                messagebox.showinfo("Success", "Sent!")
                 server.quit()
 
         # Khong co message va file
         else:
-            messagebox.showerror("Sai roi th ngu", "Khong co noi dung!")
+            messagebox.showerror("Error", "The content is empty!")
 
     # Khong co nguoi nhan
     else:
-        messagebox.showerror("Sai roi th ngu", "Nhap nguoi nhan di!")
+        messagebox.showerror("Error", "Please specify at least one recipient.!")

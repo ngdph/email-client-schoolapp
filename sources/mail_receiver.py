@@ -17,7 +17,7 @@ mail = imaplib.IMAP4_SSL(SERVER)
 mail.login(EMAIL, PASSWORD)
 
 
-def getLabels():
+def get_labels():
     # Khởi tạo label rỗng
     TOTAL_LABELS = 0
     LABELS = []
@@ -48,7 +48,7 @@ def getLabels():
     return LABELS[2:]
 
 
-def fetchEmail(label):
+def get_emails(label):
 
     # Chọn label cần lấy mail
     # f là để truyền biến vào chuỗi qua {}
@@ -109,7 +109,7 @@ def fetchEmail(label):
 
                 # Lấy người nhận
                 mail_data["to"] = message["To"]
-                
+
                 # Decode subject của mail
                 # Lấy tiêu đề, vì tiêu đề cũng có thể viết bằng nhiều ngôn ngữ nên phải được decode
                 if message["Subject"]:
@@ -192,6 +192,6 @@ def fetchEmail(label):
     return mails
 
 
-labels = getLabels()
-print(labels, type(labels))
-fetchEmail("[Gmail]/Starred")
+# labels = get_labels()
+# print(labels, type(labels))
+# get_emails("[Gmail]/Starred")

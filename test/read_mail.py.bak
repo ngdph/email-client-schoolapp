@@ -30,7 +30,7 @@ def showreadmail(username, password):
         import option
 
         ReadMail.destroy()
-        option.showoption(username, password)
+        option.display_navigation(username, password)
 
     ReadMail = Tk()
     ReadMail.title("Đọc Mail")
