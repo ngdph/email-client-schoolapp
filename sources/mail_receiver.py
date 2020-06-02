@@ -74,7 +74,7 @@ def get_emails(label):
 
     # return
     # Duyệt qua từng id của mail và lấy mail về, đồng thời xử lý mail đó
-    for i in mail_ids[::-1][:7]:
+    for i in mail_ids[:7]:
         # fetch trả về tuple 2 phần tử là status và list các response được trả về từ server
         # Gán data là reponse được trả về từ server
         status, data = mail.fetch(i, "(RFC822)")

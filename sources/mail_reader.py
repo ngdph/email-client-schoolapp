@@ -89,3 +89,8 @@ def display_read_mail(username, password):
 
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
+
+    GUI_read_mail.mainloop()
+
+
+display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")

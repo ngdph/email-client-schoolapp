@@ -30,9 +30,9 @@ def AES_Decrypt(ciphertext, key, iv):
     return result
 
 
-mess = "abcdef"
-key = "0123456789abcdef"
-iv = "0123456789abcdef"
+# mess = "abcdef"
+# key = "0123456789abcdef"
+# iv = "0123456789abcdef"
 
-print(AES_Encrypt(mess, key, iv))
-print(AES_Decrypt(AES_Encrypt(mess, key, iv), key, iv))
+# print(AES_Encrypt(mess, key, iv))
+# print(AES_Decrypt(AES_Encrypt(mess, key, iv), key, iv))

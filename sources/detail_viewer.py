@@ -1,26 +1,45 @@
 from tkinter import *
 from tkinter.ttk import Combobox
 import re
-
-
-
-# from read_mail import showreadmail
+import os
+import base64
+import threading
+from cefpython3 import cefpython as cef
+import sys
+import html_viewer
+from decrypted_box import decrypt_func
 
 
 def read_mail_func(mail):
+    email_to = None
+    email_content = None
+    html_content = None
+    subject = mail["subject"]
+
+    def html_to_data_uri(html):
+        html = html.encode("utf-8", "replace")
+        b64 = base64.b64encode(html).decode("utf-8", "replace")
+        ret = b"data:text/html;base64,{data}".format(data=b64)
+
+        return ret
+
     try:
         email_from = re.search("<(.*)>", mail["from"]).group(1)
     except:
         email_from = mail["from"]
 
-    email_to = ""
-    email_content = None
-
-    # print(mail)
     GUI_mail_reader = Tk()
     GUI_mail_reader.title(mail["subject"])
     GUI_mail_reader.geometry("700x400")
-    #GUI_mail_reader.resizable(0, 0)
+    GUI_mail_reader.resizable(0, 0)
+
+    def html_to_data_uri(html=""):
+        html = html.encode("utf-8", "replace")
+        b64 = base64.b64encode(html).decode("utf-8", "replace")
+        ret = "data:text/html;base64,{data}".format(data=b64)
+        return ret
+
+        # cef.Shutdown()
 
     # Listbox Labels navigation
     label_sender = Label(GUI_mail_reader, text=f"From: {email_from}")
@@ -30,8 +49,16 @@ def read_mail_func(mail):
         if content["contentType"] == "text/plain":
             email_content = content["payload"]
 
-        # if content["contentType"] == "application/octet-stream":
-        #     file =
+        if content["contentType"] == "text/html":
+            html_content = html_to_data_uri(content["payload"].decode())
+
+        if content["filename"]:
+            path = os.path.join("C:/Users", os.getlogin(), "Downloads", "Mailex")
+            os.makedirs(path, exist_ok=True)
+            file = open(os.path.join(path, content["filename"]), "wb")
+            file.write(content["payload"])
+            file.close()
+
     if not email_content:
         email_content = b"Not supported yet"
 
@@ -40,35 +67,68 @@ def read_mail_func(mail):
     text_message.configure(state="disabled")
     text_message.place(x=10, y=30)
 
-    label_type_crypto = Label(GUI_mail_reader, text="Type cryptography:")
-    label_type_crypto.place(x=10, y=365)
-
-    combobox_select_crypto = Combobox(
-        GUI_mail_reader,
-        values=["None", "Caesar", "Vigenere", "AES", "RSA"],
-        width=30,
-        state="readonly",
-        height=1
-    )
-    combobox_select_crypto.current(0)
-    combobox_select_crypto.place(x=150, y=368)
-
     def event_pressed_decrypt():
-        pass
+        decrypt_func(email_content)
 
-    button_decrypt = Button(GUI_mail_reader,height=1, text="Decrypt", command=event_pressed_decrypt)
-    button_decrypt.place(x=370, y=365)
+    button_decrypt = Button(
+        GUI_mail_reader, height=1, text="Decrypt", command=event_pressed_decrypt
+    )
+    # button_decrypt.place(x=370, y=365)
+
     def event_pressed_reply():
-         from mail_sender import display_send_mail
-         display_send_mail("18520165@gm.uit.edu.vn", "1634608674")
+        from mail_replier import display_reply_mail
+
+        display_reply_mail(
+            "18520165@gm.uit.edu.vn",
+            "1634608674",
+            subject,
+            email_from,
+            email_content.decode(),
+        )
+
     def event_pressed_foward():
-        pass
-    button_reply = Button(GUI_mail_reader,height=1, text="Reply",command=event_pressed_reply)
+        from mail_forwarder import display_forward_mail
+
+        display_forward_mail(
+            "18520165@gm.uit.edu.vn",
+            "1634608674",
+            subject,
+            email_from,
+            [email_to if email_to else ""],
+            email_content.decode(),
+        )
+
+    button_reply = Button(
+        GUI_mail_reader, height=1, text="Reply", command=event_pressed_reply
+    )
     button_reply.place(x=570, y=365)
 
-    button_forward = Button(GUI_mail_reader,height=1, text="Forward", command=event_pressed_foward)
+    button_forward = Button(
+        GUI_mail_reader, height=1, text="Forward", command=event_pressed_foward
+    )
     button_forward.place(x=630, y=365)
-    # frame = HtmlFrame(GUI_mail_reader, horizontal_scrollbar="auto")
 
-    # frame.set_content(email_content.decode())
-    # frame.place(x=10, y=30)
+    # html_viewer.init(html_content)
+
+    # def on_closing():
+    #     print("closing")
+    #     GUI_mail_reader.destroy()
+
+    # chromiumFrame = Frame(GUI_mail_reader, height=800, width=600)
+    # chromiumFrame.pack(side="top", fill="x")
+
+    # def display_chromium(frame):
+    #     sys.excepthook = cef.ExceptHook
+    #     # window_info = cef.WindowInfo(frame.winfo_id())
+    #     # window_info.SetAsChild(frame.winfo_id(), [0, 0, 800, 200])
+    #     cef.Initialize()
+    #     # browser = cef.CreateBrowserSync(
+    #     #      url=html_content, window_title=str(subject)
+    #     # )
+    #     # cef.MessageLoop()
+
+    # thread = threading.Thread(target=display_chromium, args=(chromiumFrame))
+    # thread.start()
+
+    # # GUI_mail_reader.protocol("WM_DELETE_WINDOW", on_closing)
+    # # GUI_mail_reader.mainloop()

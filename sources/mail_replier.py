@@ -13,94 +13,87 @@ from AES import *
 from Caesar import *
 
 
-def display_send_mail(username, password, list_reciever=None):
-    GUI_send_mail = Tk()
-    GUI_send_mail.title("Gửi Mail")
-    GUI_send_mail.geometry("500x400")
+def display_reply_mail(username, password, title, receivers, content=""):
+    GUI_reply_mail = Tk()
+    GUI_reply_mail.title(title)
+    GUI_reply_mail.geometry("500x400")
 
-    def event_pressed_back():
-        GUI_send_mail.destroy()
-        import navigation
+    newContent = f"""
 
-        navigation.display_navigation(username, password)
+
+
+----------------------
+Re: {content}
+"""
 
     def event_pressed_send():
-        send_mail_func(
+        reply_mail_func(
             username,
             password,
             entry_to.get(),
             entry_subject.get(),
             entry_message.get(0.0, END),
             filepaths.get().split(", "),
-            combobox_select_crypto.get(),
         )
 
     #### Nhóm "Mail người nhận"
     # Label "To"
-    label_to = Label(GUI_send_mail, text="To:")
-    label_to.place(x=50, y=10)
+    label_to = Label(GUI_reply_mail, text="To:")
+    label_to.place(x=20, y=10)
+
     # Entry "To"
-    entry_to = Entry(GUI_send_mail)
-    entry_to.place(x=150, y=10, width=200)
+    entry_to = Entry(GUI_reply_mail)
+    entry_to.insert(INSERT, receivers)
+    entry_to.place(x=100, y=10, width=350)
 
     #### Nhóm "Subject"
     # Label "Subject"
-    label_subject = Label(GUI_send_mail, text="Subject:")
-    label_subject.place(x=50, y=35)
+    label_subject = Label(GUI_reply_mail, text="Subject:")
+    label_subject.place(x=20, y=35)
+
     # Entry "Subject"
-    entry_subject = Entry(GUI_send_mail)
-    entry_subject.place(x=150, y=35, width=200)
+    entry_subject = Entry(GUI_reply_mail)
+    entry_subject.insert(INSERT, f"Re:{title}")
+    entry_subject.place(x=100, y=35, width=350)
 
     ### Nhóm "message"
     # Label "message"
-    label_message = Label(GUI_send_mail, text="Message:")
-    label_message.place(x=48, y=70)
+    label_message = Label(GUI_reply_mail, text="Message:")
+    label_message.place(x=20, y=70)
+
     # Entry "Message"
-    entry_message = Text(GUI_send_mail)
-    entry_message.place(x=150, y=70, width=200, height=150)
+    entry_message = Text(GUI_reply_mail)
+    entry_message.insert(INSERT, newContent, CHAR)
+    entry_message.mark_set("insert", "%d.%d" % (1, 1))
+    entry_message.place(x=100, y=70, width=350, height=250)
 
-    # Option Encryption
-    label_type_crypto = Label(GUI_send_mail, text="Type crypto:")
-    label_type_crypto.place(x=50, y=280)
-
-    combobox_select_crypto = Combobox(
-        GUI_send_mail,
-        values=["None", "Caesar", "Vigenere", "AES", "RSA"],
-        width=30,
-        state="readonly",
-    )
-    combobox_select_crypto.current(0)
-    combobox_select_crypto.place(x=150, y=280)
     ###nhóm "chọn file"
     ###event_pressed_send "chọn file"
     def event_select_file():
         file_path = filedialog.askopenfilenames(
-            parent=GUI_send_mail, title="Choose a file"
+            parent=GUI_reply_mail, title="Choose a file"
         )
         filepaths.configure(state=NORMAL)
         filepaths.insert(0, ", ".join(file_path))
         filepaths.configure(state=DISABLED)
 
     # button "chọn file"
-    button_file = Button(GUI_send_mail, text="Select file", command=event_select_file)
-    button_file.place(x=350, y=320)
-    filepaths = Entry(GUI_send_mail, width=30, state=DISABLED)
-    filepaths.place(x=150, y=320)
+    button_file = Button(GUI_reply_mail, text="Select file", command=event_select_file)
+    button_file.place(x=375, y=330)
+
+    filepaths = Entry(GUI_reply_mail, width=30, state=DISABLED)
+    filepaths.place(x=140, y=330)
 
     # Button send
-    button_send = Button(GUI_send_mail, text="Send", command=event_pressed_send)
-    button_send.place(x=200, y=350)
-
-    ### button để quay lại tab navigation
-    button_back = Button(GUI_send_mail, text="Back", command=event_pressed_back)
-    button_back.place(x=380, y=350)
-    # GUI_send_mail.mainloop()
+    button_send = Button(GUI_reply_mail, text="Send", command=event_pressed_send)
+    button_send.place(x=375, y=360)
+    # GUI_reply_mail.mainloop()
 
 
-# display_send_mail("18520165@gm.uit.edu.vn", "1634608674")
+# display_reply_mail("18520165@gm.uit.edu.vn", "1634608674")
 
 
-def send_mail_func(
+def reply_mail_func(
     username,
     password,
     receiver_email="",
@@ -134,14 +127,6 @@ def send_mail_func(
             if message != "":
                 # Message của người gửi muốn người nhận nhận được
                 body_mail = message
-
-                if crypto_type == "AES":
-                    body_mail = AES_Encrypt(
-                        body_mail, "0123456789abcdef", "0123456789abcdef"
-                    )
-                elif crypto_type == "Caesar":
-                    body_mail = Caesar_Encrypt(body_mail, 13)[: len(body_mail) - 1]
-                # body_mail = cryptor.
 
                 # Định dạng message của mail theo kiểu plain text và lưu vào message_mail
                 message_mail = MIMEText(body_mail, "plain", "utf-8")
