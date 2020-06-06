@@ -10,7 +10,7 @@ import html_viewer
 from decrypted_box import decrypt_func
 
 
-def read_mail_func(mail):
+def read_mail_func(username, password, mail):
     email_to = None
     email_content = None
     html_content = None
@@ -79,19 +79,15 @@ def read_mail_func(mail):
         from mail_replier import display_reply_mail
 
         display_reply_mail(
-            "18520165@gm.uit.edu.vn",
-            "1634608674",
-            subject,
-            email_from,
-            email_content.decode(),
+            username, password, subject, email_from, email_content.decode(),
         )
 
     def event_pressed_foward():
         from mail_forwarder import display_forward_mail
 
         display_forward_mail(
-            "18520165@gm.uit.edu.vn",
-            "1634608674",
+            username,
+            password,
             subject,
             email_from,
             [email_to if email_to else ""],

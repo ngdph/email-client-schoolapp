@@ -9,15 +9,17 @@ from email import header
 
 
 SERVER = "imap.gmail.com"
-EMAIL = "nguyen.dphux@gmail.com"
-PASSWORD = "Ilovesex123*"
+# EMAIL = "nguyen.dphux@gmail.com"
+# PASSWORD = "Ilovesex123*"
 
 # Đăng nhập vào server
-mail = imaplib.IMAP4_SSL(SERVER)
-mail.login(EMAIL, PASSWORD)
 
 
-def get_labels():
+def get_labels(username, password):
+
+    mail = imaplib.IMAP4_SSL(SERVER)
+    mail.login(username, password)
+
     # Khởi tạo label rỗng
     TOTAL_LABELS = 0
     LABELS = []
@@ -48,7 +50,10 @@ def get_labels():
     return LABELS[2:]
 
 
-def get_emails(label):
+def get_emails(username, password, label):
+
+    mail = imaplib.IMAP4_SSL(SERVER)
+    mail.login(username, password)
 
     # Chọn label cần lấy mail
     # f là để truyền biến vào chuỗi qua {}

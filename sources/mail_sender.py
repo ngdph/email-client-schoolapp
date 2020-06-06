@@ -144,7 +144,7 @@ def send_mail_func(
                 # body_mail = cryptor.
 
                 # Định dạng message của mail theo kiểu plain text và lưu vào message_mail
-                message_mail = MIMEText(body_mail, "plain", "utf-8")
+                message_mail = MIMEText(body_mail, "html", "utf-8")
                 # part2 = MIMEText(html, "html")
 
                 # Đính kèm nội dung mail đang được lưu trong par1 vào msg

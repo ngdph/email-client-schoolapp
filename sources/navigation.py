@@ -33,7 +33,7 @@ def display_navigation(username, password):
     # chuyển qua tab đọc mail
     def event_pressed_read():
         GUI_navigation.destroy()
-        display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+        display_read_mail(username, password)
 
     # button đọc mail
     button_read = Button(GUI_navigation, text="Đọc mail", command=event_pressed_read)
@@ -63,4 +63,4 @@ def display_navigation(username, password):
     # GUI_navigation.mainloop()
 
 
-display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")

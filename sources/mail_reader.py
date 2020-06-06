@@ -12,7 +12,7 @@ def display_read_mail(username, password):
     GUI_read_mail.geometry("700x400")
     GUI_read_mail.resizable(0, 0)
 
-    labels = get_labels()
+    labels = get_labels(username, password)
     label_index = 0
     selected_mail_index = 0
     mails = []
@@ -23,7 +23,7 @@ def display_read_mail(username, password):
         # Lấy mail từ label
         # get_mails trả về dict chứa label và mails
         # Lấy value trong key mails
-        temp_mails = get_emails(labels[index_of_label])["mails"]
+        temp_mails = get_emails(username, password, labels[index_of_label])["mails"]
         mail_index = 0
 
         # Xoá hết mail khi chọn label mới
@@ -57,7 +57,9 @@ def display_read_mail(username, password):
 
     def view_mail_func(event):
         print(listbox_subject_mails.curselection()[0])
-        read_mail_func(mails[listbox_subject_mails.curselection()[0]])
+        read_mail_func(
+            username, password, mails[listbox_subject_mails.curselection()[0]]
+        )
 
     # Listbox Labels navigation
     label_gmail = Label(GUI_read_mail, text="Labels")
@@ -90,7 +92,7 @@ def display_read_mail(username, password):
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
 
-    GUI_read_mail.mainloop()
+    # GUI_read_mail.mainloop()
 
 
-display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_read_mail(username, password)
