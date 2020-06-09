@@ -1,13 +1,12 @@
 from tkinter import *
 from tkinter.ttk import Combobox
-import re
 
 import Caesar
 import AES
 import RSA
 
 
-def decrypt_func(ciphertext):
+def decrypt_func(ciphertext, type):
     def caesar(ciphertext, key):
         result = Caesar.Caesar_Decrypt(ciphertext, key)
         return result
@@ -32,4 +31,4 @@ def decrypt_func(ciphertext):
 
     text_plaintext = Text(GUI_decrypted_box, width=42, height=10)
     text_plaintext.insert(INSERT, ciphertext, CHAR)
-    text_plaintext.place(x=320, y=30)
+    text_plaintext.place(x=350, y=30)

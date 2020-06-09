@@ -7,7 +7,7 @@ import threading
 from cefpython3 import cefpython as cef
 import sys
 import html_viewer
-from decrypted_box import decrypt_func
+from crypt_box import decrypt_func
 
 
 def read_mail_func(username, password, mail):
@@ -73,7 +73,7 @@ def read_mail_func(username, password, mail):
     button_decrypt = Button(
         GUI_mail_reader, height=1, text="Decrypt", command=event_pressed_decrypt
     )
-    # button_decrypt.place(x=370, y=365)
+    button_decrypt.place(x=370, y=365)
 
     def event_pressed_reply():
         from mail_replier import display_reply_mail
