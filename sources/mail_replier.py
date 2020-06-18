@@ -62,7 +62,7 @@ Re: {content}
     label_message.place(x=20, y=70)
 
     # Entry "Message"
-    entry_message = Text(GUI_reply_mail)
+    entry_message = Text(GUI_reply_mail, wrap="word",)
     entry_message.insert(INSERT, newContent, CHAR)
     entry_message.mark_set("insert", "%d.%d" % (1, 1))
     entry_message.place(x=100, y=70, width=350, height=250)

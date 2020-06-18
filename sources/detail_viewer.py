@@ -4,10 +4,13 @@ import re
 import os
 import base64
 import threading
-from cefpython3 import cefpython as cef
+
+# from cefpython3 import cefpython as cef
 import sys
 import html_viewer
 from crypt_box import decrypt_func
+
+from Caesar import *
 
 
 def read_mail_func(username, password, mail):
@@ -47,7 +50,7 @@ def read_mail_func(username, password, mail):
 
     for content in mail["content"]:
         if content["contentType"] == "text/plain":
-            email_content = content["payload"]
+            email_content = content["payload"].decode()
 
         if content["contentType"] == "text/html":
             html_content = html_to_data_uri(content["payload"].decode())
@@ -62,13 +65,15 @@ def read_mail_func(username, password, mail):
     if not email_content:
         email_content = b"Not supported yet"
 
-    text_message = Text(GUI_mail_reader, width=84, height=20)
-    text_message.insert(INSERT, email_content.decode(), CHAR)
+    text_message = Text(GUI_mail_reader, wrap="word", width=84, height=20)
+    text_message.insert(INSERT, email_content, CHAR)
     text_message.configure(state="disabled")
     text_message.place(x=10, y=30)
 
     def event_pressed_decrypt():
-        decrypt_func(email_content)
+        decrypt_func(
+            email_content, mail["cryptKey"] if hasattr(mail, "cryptKey") else None
+        )
 
     button_decrypt = Button(
         GUI_mail_reader, height=1, text="Decrypt", command=event_pressed_decrypt
@@ -79,7 +84,7 @@ def read_mail_func(username, password, mail):
         from mail_replier import display_reply_mail
 
         display_reply_mail(
-            username, password, subject, email_from, email_content.decode(),
+            username, password, subject, email_from, email_content,
         )
 
     def event_pressed_foward():
@@ -91,7 +96,7 @@ def read_mail_func(username, password, mail):
             subject,
             email_from,
             [email_to if email_to else ""],
-            email_content.decode(),
+            email_content,
         )
 
     button_reply = Button(

@@ -7,7 +7,7 @@ def Caesar_Encrypt(plaintext, key):
     for letter_index in range(len(plaintext)):
         char = plaintext[letter_index]
         m = ord(char)
-        if m == 39:
+        if m == 39: 
             result = result + ","
         elif m == 46:
             result = result + "."

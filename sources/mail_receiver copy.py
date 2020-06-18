@@ -114,14 +114,7 @@ def get_emails(username, password, label):
             # encodeType: kiểu encode (chuỗi)
             # payload: dữ liệu (chuỗi hoặc byte)
             # filename: tên file của phần file đính kèm(nếu có) (chuỗi), nếu chỉ là phần nội dung mail thì phần này sẽ là None
-            data_part = {
-                "contentType": None,
-                "encodeType": None,
-                "payload": None,
-                "filename": None,
-                "to": None,
-                "cryptKey": None,
-            }
+            data_part = None
 
             # Nếu dữ liệu là tuple thì xét tiếp vì có chứa dữ liệu
             if isinstance(response_part, tuple):
@@ -129,6 +122,7 @@ def get_emails(username, password, label):
                 # Lấy From và Subject của mail
                 # response_part chứa 2 phần tử là định dạng của mail và byte dữ liệu nên ta chọn [1]
                 message = email.message_from_bytes(response_part[1])
+                print(type(message))
 
                 # Lấy người gửi
                 mail_data["from"] = message["From"]
@@ -221,6 +215,6 @@ def get_emails(username, password, label):
     return mails
 
 
-# labels = get_labels()
-# print(labels, type(labels))
-# get_emails("[Gmail]/Starred")
+labels = get_labels("18520165@gm.uit.edu.vn", "1634608674")
+print(labels, type(labels))
+get_emails("18520165@gm.uit.edu.vn", "1634608674", "[Gmail]/Starred")

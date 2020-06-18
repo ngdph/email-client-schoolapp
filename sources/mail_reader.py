@@ -1,8 +1,9 @@
 from tkinter import *
 from tkinter.ttk import *
 from tkinter import filedialog
-from mail_receiver import get_labels, get_emails
+from mail_receiver import *
 from detail_viewer import read_mail_func
+import threading
 
 
 def display_read_mail(username, password):
@@ -43,10 +44,14 @@ def display_read_mail(username, password):
             mail_index += 1
 
     # Get mail subjects from label
-    def extract_subjects_by_label_func(event):
+    def extract_subjects_by_label_func():
         listbox_subject_mails.delete(0, "end")
         label_index = listbox_labels_gmail.curselection()[0]
         fetch_subjects_func(listbox_labels_gmail.curselection()[0])
+
+    def get_subjects(event):
+        thread = threading.Thread(target=extract_subjects_by_label_func)
+        thread.start()
 
     # Back button
     def event_pressed_back():
@@ -60,6 +65,12 @@ def display_read_mail(username, password):
         read_mail_func(
             username, password, mails[listbox_subject_mails.curselection()[0]]
         )
+
+    def on_close():
+        threads = threading.enumerate()
+
+        for thread in threads:
+            thread._stop()
 
     # Listbox Labels navigation
     label_gmail = Label(GUI_read_mail, text="Labels")
@@ -77,7 +88,7 @@ def display_read_mail(username, password):
         listbox_labels_gmail.insert(lb_index, f"{lb}")
         lb_index += 1
 
-    listbox_labels_gmail.bind("<Double-Button-1>", extract_subjects_by_label_func)
+    listbox_labels_gmail.bind("<Double-Button-1>", get_subjects)
 
     # info label Listbox
     label_subject_mails = Label(GUI_read_mail, text="Mails")
@@ -92,7 +103,8 @@ def display_read_mail(username, password):
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
 
-    # GUI_read_mail.mainloop()
+    GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
+    GUI_read_mail.mainloop()
 
 
-# display_read_mail(username, password)
+display_read_mail("18520165@gm.uit.edu.vn", "1634608674")

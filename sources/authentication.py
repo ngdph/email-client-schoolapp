@@ -109,12 +109,12 @@ class Authenticate:
         login_status = connect.login()
 
         if login_status is not False:
-            messagebox.showinfo("Success", "Login succeeded")
             self.GUI_login.destroy()
             display_navigation(username, password)
         else:
             messagebox.showerror(
-                "Could not connect, please try again", "Username or password is invalid."
+                "Could not connect, please try again",
+                "Username or password is invalid.",
             )
 
 
