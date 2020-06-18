@@ -1,25 +1,24 @@
 from tkinter import *
 from tkinter.ttk import Combobox
 
-import Caesar
-import AES
-import RSA
+
+import crypta
 
 
 def decrypt_func(ciphertext, key):
     def caesar(ciphertext, key):
-        result = Caesar.Caesar_Decrypt(ciphertext, key) if key else ciphertext
+        result = crypta.Caesar_Decrypt(ciphertext, key) if key else ciphertext
         return result
 
     def vigenere(ciphertext, key):
         return ciphertext
 
     def aes(ciphertext, key, iv):
-        result = AES.AES_Decrypt(ciphertext, key, iv) if key else ciphertext
+        result = crypta.AES_Decrypt(ciphertext, key, iv) if key else ciphertext
         return result
 
     def rsa(ciphertext, key):
-        result = RSA.RSA_Decrypt(ciphertext, key) if key else ciphertext
+        result = crypta.RSA_Decrypt(ciphertext, key) if key else ciphertext
         return result
 
     GUI_crypt_box = Tk()

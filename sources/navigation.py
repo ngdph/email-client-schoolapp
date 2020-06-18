@@ -11,8 +11,6 @@ def display_navigation(username, password):
     GUI_navigation.title("GUI_navigation")
     GUI_navigation.geometry("300x500")
 
-    #####
-
     # chuyển qua tab soạn mail
     def event_pressed_send():
         GUI_navigation.destroy()

@@ -9,10 +9,7 @@ from email.mime.text import MIMEText
 
 import smtplib, email, base64, os
 
-from AES import *
-from DES import *
-from Caesar import *
-from Vigenere import *
+import crypta
 
 
 def display_send_mail(username, password, list_reciever=None):
@@ -147,19 +144,21 @@ def display_send_mail(username, password, list_reciever=None):
                         msg.add_header("CrypKey", entry_key.get())
 
                         if crypto_type == "AES":
-                            body_mail = AES_Encrypt(
+                            body_mail = crypta.AES_Encrypt(
                                 body_mail, "0123456789abcdef", "0123456789abcdef"
                             )
                         elif crypto_type == "Caesar":
-                            body_mail = Caesar_Encrypt(body_mail, int(entry_key.get()))[
-                                : len(body_mail) - 1
-                            ]
+                            body_mail = crypta.Caesar_Encrypt(
+                                body_mail, int(entry_key.get())
+                            )[: len(body_mail) - 1]
 
                         elif crypto_type == "DES":
-                            body_mail = DES_Encrypt(body_mail, "12346578", "13245678")
+                            body_mail = crypta.DES_Encrypt(
+                                body_mail, "12346578", "13245678"
+                            )
 
                         elif crypto_type == "Vigenere":
-                            body_mail = Vigenere_Encrypt(
+                            body_mail = crypta.Vigenere_Encrypt(
                                 body_mail, int(entry_key.get())
                             )
 

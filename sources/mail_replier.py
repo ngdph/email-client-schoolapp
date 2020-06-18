@@ -9,10 +9,6 @@ from email.mime.text import MIMEText
 
 import smtplib, email, base64, os
 
-from AES import *
-from Caesar import *
-
-
 def display_reply_mail(username, password, title, receivers, content=""):
     GUI_reply_mail = Tk()
     GUI_reply_mail.title(title)

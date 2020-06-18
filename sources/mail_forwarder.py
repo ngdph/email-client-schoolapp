@@ -9,9 +9,6 @@ from email.mime.text import MIMEText
 
 import smtplib, email, base64, os
 
-from AES import *
-from Caesar import *
-
 
 def display_forward_mail(username, password, subject, sender, receivers=[], content=""):
     GUI_reply_mail = Tk()

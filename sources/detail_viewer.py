@@ -10,8 +10,6 @@ import sys
 import html_viewer
 from crypt_box import decrypt_func
 
-from Caesar import *
-
 
 def read_mail_func(username, password, mail):
     email_to = None
