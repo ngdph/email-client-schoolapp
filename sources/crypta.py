@@ -7,10 +7,9 @@ from Crypto.Cipher import PKCS1_OAEP, DES, AES
 import base64
 import rsa
 
-class RSA:
-    def encrypt(self, plaintext, key):
-        ciphertext = 
-
+# class RSA:
+#     def encrypt(self, plaintext, key):
+#         ciphertext =
 
 
 def RSA_Encrypt(plaintext, key):
