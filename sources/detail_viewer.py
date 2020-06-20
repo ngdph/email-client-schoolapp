@@ -7,7 +7,6 @@ import threading
 
 # from cefpython3 import cefpython as cef
 import sys
-import html_viewer
 from crypt_box import decrypt_func
 
 
@@ -70,7 +69,8 @@ def read_mail_func(username, password, mail):
 
     def event_pressed_decrypt():
         decrypt_func(
-            email_content.decode(), mail["cryptKey"] if hasattr(mail, "cryptKey") else None
+            email_content.decode(),
+            mail["cryptKey"] if hasattr(mail, "cryptKey") else None,
         )
 
     button_decrypt = Button(

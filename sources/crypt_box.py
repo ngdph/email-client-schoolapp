@@ -116,7 +116,7 @@ def decrypt_func(ciphertext, key):
 
     combobox_select_crypto.bind("<<ComboboxSelected>>", event_selected_crypto)
 
-    GUI_crypt_box.mainloop()
+    # GUI_crypt_box.mainloop()
 
 
 decrypt_func("", "")
