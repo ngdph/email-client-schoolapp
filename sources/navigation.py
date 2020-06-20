@@ -58,7 +58,7 @@ def display_navigation(username, password):
     button_signout.place(x=1, y=1)
     button_signout.place(x=240, y=160)
 
-    # GUI_navigation.mainloop()
+    GUI_navigation.mainloop()
 
 
 # display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")

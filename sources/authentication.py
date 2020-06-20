@@ -108,7 +108,7 @@ class Authenticate:
         connect = Email(username, password)
         login_status = connect.login()
 
-        if login_status is not False:
+        if login_status:
             self.GUI_login.destroy()
             display_navigation(username, password)
         else:

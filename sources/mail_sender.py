@@ -7,6 +7,7 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
+
 import smtplib, email, base64, os
 
 import crypta
@@ -15,7 +16,8 @@ import crypta
 def display_send_mail(username, password, list_reciever=None):
     GUI_send_mail = Tk()
     GUI_send_mail.title("Gửi Mail")
-    GUI_send_mail.geometry("700x525")
+    GUI_send_mail.geometry("700x625")
+    GUI_send_mail.resizable(0, 0)
 
     def event_pressed_back():
         GUI_send_mail.destroy()
@@ -39,21 +41,37 @@ def display_send_mail(username, password, list_reciever=None):
     label_to = Label(GUI_send_mail, text="To:")
     label_to.place(x=20, y=20)
 
-    #### Nhóm "Subject"
     # Label "Subject"
     label_subject = Label(GUI_send_mail, text="Subject:")
     label_subject.place(x=20, y=60)
-
-    label_key = Label(GUI_send_mail, text=f"Key:")
-    label_key.place(x=20, y=350)
 
     # Label "message"
     label_message = Label(GUI_send_mail, text="Message:")
     label_message.place(x=20, y=100)
 
-    # Entry "Message"
+    # Option Encryption
+    label_attachments = Label(GUI_send_mail, text="Attachments:", width=100)
+    label_attachments.place(x=20, y=350)
+
+    # Option Encryption
+    label_encryption = Label(GUI_send_mail, text="Encryption:", width=100)
+    label_encryption.place(x=20, y=380)
+
+    label_key = Label(GUI_send_mail, text=f"Key:")
+    label_key.place(x=20, y=410)
+
+    label_iv = Label(GUI_send_mail, text=f"IV:")
+    label_iv.place(x=340, y=410)
+
+    label_recipient_key = Label(GUI_send_mail, text=f"Recipient public key:")
+    label_recipient_key.place(x=20, y=520)
+
+    label_rsa_key = Label(GUI_send_mail, text=f"RSA keys:")
+    label_rsa_key.place(x=20, y=460)
+
+    # Text "Message"
     entry_message = Text(GUI_send_mail, wrap="word",)
-    entry_message.place(x=100, y=100, width=230, height=150)
+    entry_message.place(x=100, y=100, width=500, height=230)
 
     # Entry "To"
     entry_to = Entry(GUI_send_mail)
@@ -63,13 +81,6 @@ def display_send_mail(username, password, list_reciever=None):
     entry_subject = Entry(GUI_send_mail)
     entry_subject.place(x=100, y=60, width=230)
 
-    entry_key = Entry(GUI_send_mail)
-    entry_key.place(x=100, y=350)
-
-    # Option Encryption
-    label_type_crypto = Label(GUI_send_mail, text="Type crypto:", width=100)
-    label_type_crypto.place(x=20, y=310)
-
     combobox_select_crypto = Combobox(
         GUI_send_mail,
         values=["None", "Caesar", "Vigenere", "AES", "DES"],
@@ -77,7 +88,23 @@ def display_send_mail(username, password, list_reciever=None):
         state="readonly",
     )
     combobox_select_crypto.current(0)
-    combobox_select_crypto.place(x=100, y=310)
+    combobox_select_crypto.place(x=100, y=380)
+
+    entry_key = Entry(GUI_send_mail, width=35)
+    entry_key.place(x=100, y=410)
+
+    entry_iv = Entry(GUI_send_mail, width=35)
+    entry_iv.place(x=385, y=410)
+
+    entry_recipient_key = Entry(GUI_send_mail, width=35)
+    entry_recipient_key.place(x=150, y=520)
+
+    entry_rsa_pub = Entry(GUI_send_mail, width=35, state=DISABLED)
+    entry_rsa_pub.place(x=150, y=460)
+
+    entry_rsa_priv = Entry(GUI_send_mail, width=35, state=DISABLED)
+    entry_rsa_priv.place(x=150, y=490)
+
     ###nhóm "chọn file"
     ###event_pressed_send "chọn file"
     def event_select_file():
@@ -88,19 +115,35 @@ def display_send_mail(username, password, list_reciever=None):
         filepaths.insert(0, ", ".join(file_path))
         filepaths.configure(state=DISABLED)
 
+    def event_pressed_generate_keys():
+        rsa_keys = 
+
     # button "chọn file"
     button_file = Button(GUI_send_mail, text="Select file", command=event_select_file)
-    button_file.place(x=350, y=270)
-    filepaths = Entry(GUI_send_mail, width=37, state=DISABLED)
-    filepaths.place(x=100, y=270)
+    button_file.place(x=525, y=350)
+
+    filepaths = Entry(GUI_send_mail, width=55, state=DISABLED)
+    filepaths.place(x=100, y=350)
+
+    # Button send
+    button_send = Button(GUI_send_mail, text="Generate RSA keys", command=event_pressed_generate_keys, width=20)
+    button_send.place(x=470, y=460)
 
     # Button send
     button_send = Button(GUI_send_mail, text="Send", command=event_pressed_send)
-    button_send.place(x=180, y=390)
+    button_send.place(x=600, y=570)
 
     ### button để quay lại tab navigation
     button_back = Button(GUI_send_mail, text="Back", command=event_pressed_back)
-    button_back.place(x=350, y=390)
+    button_back.place(x=20, y=570)
+
+    rsa_key = None
+
+    def encrypt_for_exchanging(data, recipientPub, userPrivate):
+        private_encrypted = crypta.RSA_Encrypt(data, userPrivate)
+        public_encrypted = crypta.RSA_Encrypt(private_encrypted, recipientPub)
+
+        return public_encrypted
 
     def send_mail_func(
         username,
@@ -141,7 +184,13 @@ def display_send_mail(username, password, list_reciever=None):
                     body_mail = message
 
                     if crypto_type:
-                        msg.add_header("CrypKey", entry_key.get())
+
+                        if entry_key:
+                            # encrypted_key = encrypt_for_exchanging(entry_key.get(), )
+                            msg.add_header("CryptKey", entry_key.get())
+
+                        if entry_iv:
+                            msg.add_header("CryptInitial", entry_iv.get())
 
                         if crypto_type == "AES":
                             body_mail = crypta.AES_Encrypt(

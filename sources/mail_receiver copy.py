@@ -138,8 +138,8 @@ def get_emails(username, password, label):
                         message["Subject"]
                     )[0]
 
-                    if message["CrypKey"]:
-                        mail_data["cryptKey"] = message["CrypKey"]
+                    if message["CryptKey"]:
+                        mail_data["cryptKey"] = message["CryptKey"]
 
                     # Nếu tiêu đề trả về là dạng bytes thì phải decode ra
                     if isinstance(mail_data["subject"], bytes):

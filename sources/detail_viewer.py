@@ -48,7 +48,7 @@ def read_mail_func(username, password, mail):
 
     for content in mail["content"]:
         if content["contentType"] == "text/plain":
-            email_content = content["payload"].decode()
+            email_content = content["payload"]
 
         if content["contentType"] == "text/html":
             html_content = html_to_data_uri(content["payload"].decode())
@@ -64,13 +64,13 @@ def read_mail_func(username, password, mail):
         email_content = b"Not supported yet"
 
     text_message = Text(GUI_mail_reader, wrap="word", width=84, height=20)
-    text_message.insert(INSERT, email_content, CHAR)
+    text_message.insert(INSERT, email_content.decode(), CHAR)
     text_message.configure(state="disabled")
     text_message.place(x=10, y=30)
 
     def event_pressed_decrypt():
         decrypt_func(
-            email_content, mail["cryptKey"] if hasattr(mail, "cryptKey") else None
+            email_content.decode(), mail["cryptKey"] if hasattr(mail, "cryptKey") else None
         )
 
     button_decrypt = Button(
@@ -82,7 +82,7 @@ def read_mail_func(username, password, mail):
         from mail_replier import display_reply_mail
 
         display_reply_mail(
-            username, password, subject, email_from, email_content,
+            username, password, subject, email_from, email_content.decode(),
         )
 
     def event_pressed_foward():
@@ -94,7 +94,7 @@ def read_mail_func(username, password, mail):
             subject,
             email_from,
             [email_to if email_to else ""],
-            email_content,
+            email_content.decode(),
         )
 
     button_reply = Button(

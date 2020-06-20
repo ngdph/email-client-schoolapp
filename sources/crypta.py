@@ -5,11 +5,16 @@ from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, DES, AES
 
 import base64
+import rsa
+
+class RSA:
+    def encrypt(self, plaintext, key):
+        ciphertext = 
+
 
 
 def RSA_Encrypt(plaintext, key):
     public_key = key.publickey().exportKey("PEM")
-    plaintext = str.encode(plaintext)
 
     rsa_public_key = RSA.importKey(public_key)
     rsa_public_key = PKCS1_OAEP.new(rsa_public_key)
@@ -24,6 +29,12 @@ def RSA_Decrypt(ciphertext, key):
     rsa_private_key = PKCS1_OAEP.new(rsa_private_key)
     decrypted_text = rsa_private_key.decrypt(ciphertext)
     return decrypted_text
+
+
+def generate_rsa_keys():
+    key_pair = RSA.generate(2048)
+
+    return (key_pair.export_key(), key_pair.publickey().export_key())
 
 
 def pad(plainbytes, block_size, style):
