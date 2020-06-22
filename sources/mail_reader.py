@@ -7,7 +7,7 @@ import threading
 def display_read_mail(username, password):
     # instance of tk
     GUI_read_mail = Tk()
-    GUI_read_mail.title("Đọc Mail")
+    GUI_read_mail.title("Read mail")
     GUI_read_mail.geometry("700x400")
     GUI_read_mail.resizable(0, 0)
 

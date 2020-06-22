@@ -14,6 +14,7 @@ def decrypt_func(mail_content="", pub_key=""):
     public_key = None
 
     GUI_crypt_box = Tk()
+    GUI_crypt_box.title("Cryptbox")
     GUI_crypt_box.geometry("800x600")
     GUI_crypt_box.resizable(0, 0)
 

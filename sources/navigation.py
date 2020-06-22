@@ -8,7 +8,7 @@ from mail_sender import display_send_mail
 def display_navigation(username, password):
     # tạo form option
     GUI_navigation = Tk()
-    GUI_navigation.title("GUI_navigation")
+    GUI_navigation.title("Navigate")
     GUI_navigation.geometry("300x500")
 
     # chuyển qua tab soạn mail
@@ -48,8 +48,8 @@ def display_navigation(username, password):
         import authentication
 
         root = Tk()
-        auth = authentication.authenticate(root)
-        # root.mainloop()
+        auth = authentication.Authenticate(root)
+        root.mainloop()
 
     # button button_signout quay lại tab Login
     button_signout = Button(

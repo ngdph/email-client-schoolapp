@@ -20,7 +20,7 @@ import cryptor
 
 def display_send_mail(username, password, list_reciever=None):
     GUI_send_mail = Tk()
-    GUI_send_mail.title("Gửi Mail")
+    GUI_send_mail.title("Send mail")
     GUI_send_mail.geometry("650x540")
     GUI_send_mail.resizable(0, 0)
 
