@@ -99,7 +99,7 @@ def get_emails(username, password, label):
 
     # return
     # Duyệt qua từng id của mail và lấy mail về, đồng thời xử lý mail đó
-    for i in mail_ids[:7]:
+    for i in mail_ids[-7:]:
         # fetch trả về tuple 2 phần tử là status và list các response được trả về từ server
         # Gán data là reponse được trả về từ server
         status, data = mail.fetch(i, "(RFC822)")
@@ -120,7 +120,8 @@ def get_emails(username, password, label):
                 "payload": None,
                 "filename": None,
                 "to": None,
-                "cryptKey": None,
+                "Signature": None,
+                "Signature-Verifier": None,
             }
 
             # Nếu dữ liệu là tuple thì xét tiếp vì có chứa dữ liệu
@@ -129,7 +130,6 @@ def get_emails(username, password, label):
                 # Lấy From và Subject của mail
                 # response_part chứa 2 phần tử là định dạng của mail và byte dữ liệu nên ta chọn [1]
                 message = email.message_from_bytes(response_part[1])
-
                 # Lấy người gửi
                 mail_data["from"] = message["From"]
 
@@ -143,9 +143,6 @@ def get_emails(username, password, label):
                     mail_data["subject"], encoding = header.decode_header(
                         message["Subject"]
                     )[0]
-
-                    if message["CryptKey"]:
-                        mail_data["cryptKey"] = message["CryptKey"]
 
                     # Nếu tiêu đề trả về là dạng bytes thì phải decode ra
                     if isinstance(mail_data["subject"], bytes):
@@ -180,6 +177,10 @@ def get_emails(username, password, label):
                         data_part["encodeType"] = data["Content-Transfer-Encoding"]
                         data_part["filename"] = data.get_filename()
                         data_part["payload"] = decoded
+                        data_part["Signature"] = (
+                            data["Signature"] if data["Signature"] else None
+                        )
+                        data_part["Signature-Verifier"] = data["Signature-Verifier"]
 
                         filename = ""
 
@@ -212,6 +213,10 @@ def get_emails(username, password, label):
                     data_part["payload"] = message.get_payload()
                     # Append vào list dữ liệu của mail
                     mail_data["content"].append(data_part)
+                    data_part["Signature"] = (
+                        message["Signature"] if message["Signature"] else None
+                    )
+                    mail_data["Signature-Verifier"] = message["Signature-Verifier"]
 
         # Append vào danh sách mail
         mails["mails"].append(mail_data)

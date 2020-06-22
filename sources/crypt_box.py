@@ -1,72 +1,81 @@
 from tkinter import *
 from tkinter.ttk import Combobox
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+import cryptor
+import unidecode
 
 
-import crypta
+def decrypt_func(mail_content="", pub_key=""):
 
-
-def decrypt_func(ciphertext, key):
-    def caesar(ciphertext, key):
-        result = crypta.Caesar_Decrypt(ciphertext, key) if key else ciphertext
-        return result
-
-    def vigenere(ciphertext, key):
-        return ciphertext
-
-    def aes(ciphertext, key, iv):
-        result = crypta.AES_Decrypt(ciphertext, key, iv) if key else ciphertext
-        return result
-
-    def rsa(ciphertext, key):
-        result = crypta.RSA_Decrypt(ciphertext, key) if key else ciphertext
-        return result
-
-    def event_pressed_send(event):
-        pass
-
-    def event_pressed_back(event):
-        pass
+    signature = None
+    cipher_message = None
+    public_key = None
 
     GUI_crypt_box = Tk()
     GUI_crypt_box.geometry("800x600")
     GUI_crypt_box.resizable(0, 0)
 
-    label_sender_public_key = Label(GUI_crypt_box, text="Sender public key:")
-    label_sender_public_key.place(x=20, y=300)
+    plain_message = ""
 
-    label_user_private_key = Label(GUI_crypt_box, text="Your private key:")
-    label_user_private_key.place(x=20, y=330)
+    if pub_key:
+        try:
+            signature = bytes.fromhex(mail_content[-512:])
+            pub = RSA.import_key(bytes.fromhex(pub_key))
+            public_key = pkcs1_15.new(pub)
+            cipher_message = mail_content.replace(mail_content[-512:], "")
 
-    label_encrypted_key = Label(GUI_crypt_box, text="Encryption:")
-    label_encrypted_key.place(x=20, y=370)
+            hashed_m = SHA256.new()
+            hashed_m.update(cipher_message.encode())
 
-    label_encrypted_key = Label(GUI_crypt_box, text="Encrypted key:")
-    label_encrypted_key.place(x=20, y=400)
+            public_key.verify(hashed_m, signature)
 
-    label_encrypted_iv = Label(GUI_crypt_box, text="Encrypted iv:")
-    label_encrypted_iv.place(x=20, y=430)
+        except Exception as e:
+            print("This message had been tampered", e)
 
-    label_key = Label(GUI_crypt_box, text="Key:")
-    label_key.place(x=420, y=400)
+    def event_pressed_decrypt():
+        selection = combobox_select_crypto.get()
 
-    label_iv = Label(GUI_crypt_box, text="IV:")
-    label_iv.place(x=420, y=430)
+        if selection == "CAESAR":
+            plain_message = cryptor.Caesar_Decrypt(cipher_message, int(key.get()))
+
+        if selection == "VIGENERE":
+            handled_key = unidecode.unidecode(str(key.get()).lower().replace(" ", ""))
+            plain_message = cryptor.Vigenere_Decrypt(cipher_message, handled_key)
+
+        if selection == "AES":
+            plain_message = cryptor.AES_Decrypt(cipher_message, key.get(), iv.get())
+
+        if selection == "DES":
+            plain_message = cryptor.DES_Decrypt(cipher_message, key.get(), iv.get())
+
+        text_plaintext.insert(
+            INSERT,
+            plain_message.decode()
+            if isinstance(plain_message, bytes)
+            else plain_message,
+            CHAR,
+        )
+
+    def event_pressed_back(event):
+        pass
 
     text_ciphertext = Text(GUI_crypt_box, wrap="word", width=45, height=15)
-    text_ciphertext.insert(INSERT, ciphertext, CHAR)
+    text_ciphertext.insert(INSERT, cipher_message, CHAR)
     text_ciphertext.place(x=20, y=20)
 
     text_plaintext = Text(GUI_crypt_box, wrap="word", width=45, height=15)
-    text_plaintext.insert(INSERT, caesar(ciphertext, key), CHAR)
     text_plaintext.place(x=410, y=20)
 
-    sender_public_key = Entry(GUI_crypt_box, width=50)
-    sender_public_key.configure(state=NORMAL)
-    sender_public_key.place(x=150, y=300)
+    label_encrypted_key = Label(GUI_crypt_box, text="Encryption:")
+    label_encrypted_key.place(x=20, y=280)
 
-    user_private_key = Entry(GUI_crypt_box, width=50)
-    user_private_key.configure(state=NORMAL)
-    user_private_key.place(x=150, y=330)
+    label_key = Label(GUI_crypt_box, text="Key:")
+    label_key.place(x=20, y=310)
+
+    label_iv = Label(GUI_crypt_box, text="IV:")
+    label_iv.place(x=20, y=340)
 
     combobox_select_crypto = Combobox(
         GUI_crypt_box,
@@ -75,23 +84,15 @@ def decrypt_func(ciphertext, key):
         state=NORMAL,
     )
     combobox_select_crypto.current(0)
-    combobox_select_crypto.place(x=150, y=370)
-
-    encrypted_key = Entry(GUI_crypt_box, width=40)
-    encrypted_key.configure(state=NORMAL)
-    encrypted_key.place(x=150, y=400)
-
-    encrypted_iv = Entry(GUI_crypt_box, width=40)
-    encrypted_iv.configure(state=NORMAL)
-    encrypted_iv.place(x=150, y=430)
+    combobox_select_crypto.place(x=150, y=280)
 
     key = Entry(GUI_crypt_box, width=40)
     key.configure(state=NORMAL)
-    key.place(x=490, y=400)
+    key.place(x=150, y=310)
 
     iv = Entry(GUI_crypt_box, width=40)
-    iv.configure(state=NORMAL)
-    iv.place(x=490, y=430)
+    iv.configure(state=DISABLED)
+    iv.place(x=150, y=340)
 
     ### button để quay lại tab navigation
     button_back = Button(
@@ -100,18 +101,18 @@ def decrypt_func(ciphertext, key):
     button_back.place(x=20, y=520)
 
     # Button send
-    button_send = Button(
-        GUI_crypt_box, text="Decrypt", command=event_pressed_send, width=10
+    button_decrypt = Button(
+        GUI_crypt_box, text="Decrypt", command=event_pressed_decrypt, width=10
     )
-    button_send.place(x=700, y=520)
+    button_decrypt.place(x=700, y=520)
 
     def event_selected_crypto(event):
         selected_type = combobox_select_crypto.get()
         if selected_type == "CAESAR" or selected_type == "VIGENERE":
-            encrypted_iv.configure(state=DISABLED)
+            iv.configure(state=DISABLED)
             iv.configure(state=DISABLED)
         else:
-            encrypted_iv.configure(state=NORMAL)
+            iv.configure(state=NORMAL)
             iv.configure(state=NORMAL)
 
     combobox_select_crypto.bind("<<ComboboxSelected>>", event_selected_crypto)
@@ -119,5 +120,5 @@ def decrypt_func(ciphertext, key):
     # GUI_crypt_box.mainloop()
 
 
-decrypt_func("", "")
+# decrypt_func("")
 

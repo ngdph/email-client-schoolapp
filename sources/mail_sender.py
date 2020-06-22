@@ -6,17 +6,22 @@ from email import encoders
 from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+import datetime
 
-
+import unidecode
 import smtplib, email, base64, os
 
-import crypta
+from secretpy import Caesar, Vigenere
+from secretpy import alphabets
+
+
+import cryptor
 
 
 def display_send_mail(username, password, list_reciever=None):
     GUI_send_mail = Tk()
     GUI_send_mail.title("Gửi Mail")
-    GUI_send_mail.geometry("700x625")
+    GUI_send_mail.geometry("650x540")
     GUI_send_mail.resizable(0, 0)
 
     def event_pressed_back():
@@ -63,12 +68,6 @@ def display_send_mail(username, password, list_reciever=None):
     label_iv = Label(GUI_send_mail, text=f"IV:")
     label_iv.place(x=340, y=410)
 
-    label_recipient_key = Label(GUI_send_mail, text=f"Recipient public key:")
-    label_recipient_key.place(x=20, y=520)
-
-    label_rsa_key = Label(GUI_send_mail, text=f"RSA keys:")
-    label_rsa_key.place(x=20, y=460)
-
     # Text "Message"
     entry_message = Text(GUI_send_mail, wrap="word",)
     entry_message.place(x=100, y=100, width=500, height=230)
@@ -81,29 +80,31 @@ def display_send_mail(username, password, list_reciever=None):
     entry_subject = Entry(GUI_send_mail)
     entry_subject.place(x=100, y=60, width=230)
 
+    def event_changed_crypto(event):
+        if (
+            combobox_select_crypto.get() == "AES"
+            or combobox_select_crypto.get() == "DES"
+        ):
+            entry_iv.configure(state=NORMAL)
+
+        else:
+            entry_iv.configure(state=DISABLED)
+
     combobox_select_crypto = Combobox(
         GUI_send_mail,
-        values=["None", "Caesar", "Vigenere", "AES", "DES"],
+        values=["None", "CAESAR", "VIGENERE", "AES", "DES"],
         width=17,
         state="readonly",
     )
     combobox_select_crypto.current(0)
+    combobox_select_crypto.bind("<<ComboboxSelected>>", event_changed_crypto)
     combobox_select_crypto.place(x=100, y=380)
 
     entry_key = Entry(GUI_send_mail, width=35)
     entry_key.place(x=100, y=410)
 
-    entry_iv = Entry(GUI_send_mail, width=35)
+    entry_iv = Entry(GUI_send_mail, width=35, state=DISABLED)
     entry_iv.place(x=385, y=410)
-
-    entry_recipient_key = Entry(GUI_send_mail, width=35)
-    entry_recipient_key.place(x=150, y=520)
-
-    entry_rsa_pub = Entry(GUI_send_mail, width=35, state=DISABLED)
-    entry_rsa_pub.place(x=150, y=460)
-
-    entry_rsa_priv = Entry(GUI_send_mail, width=35, state=DISABLED)
-    entry_rsa_priv.place(x=150, y=490)
 
     ###nhóm "chọn file"
     ###event_pressed_send "chọn file"
@@ -112,11 +113,9 @@ def display_send_mail(username, password, list_reciever=None):
             parent=GUI_send_mail, title="Choose a file"
         )
         filepaths.configure(state=NORMAL)
+        filepaths.delete(0, "end")
         filepaths.insert(0, ", ".join(file_path))
         filepaths.configure(state=DISABLED)
-
-    def event_pressed_generate_keys():
-        rsa_keys = 
 
     # button "chọn file"
     button_file = Button(GUI_send_mail, text="Select file", command=event_select_file)
@@ -126,22 +125,18 @@ def display_send_mail(username, password, list_reciever=None):
     filepaths.place(x=100, y=350)
 
     # Button send
-    button_send = Button(GUI_send_mail, text="Generate RSA keys", command=event_pressed_generate_keys, width=20)
-    button_send.place(x=470, y=460)
-
-    # Button send
     button_send = Button(GUI_send_mail, text="Send", command=event_pressed_send)
-    button_send.place(x=600, y=570)
+    button_send.place(x=525, y=480)
 
     ### button để quay lại tab navigation
     button_back = Button(GUI_send_mail, text="Back", command=event_pressed_back)
-    button_back.place(x=20, y=570)
+    button_back.place(x=20, y=480)
 
     rsa_key = None
 
     def encrypt_for_exchanging(data, recipientPub, userPrivate):
-        private_encrypted = crypta.RSA_Encrypt(data, userPrivate)
-        public_encrypted = crypta.RSA_Encrypt(private_encrypted, recipientPub)
+        private_encrypted = cryptor.RSA_Encrypt(data, userPrivate)
+        public_encrypted = cryptor.RSA_Encrypt(private_encrypted, recipientPub)
 
         return public_encrypted
 
@@ -173,10 +168,35 @@ def display_send_mail(username, password, list_reciever=None):
                 msg["Subject"] = Subject
                 msg["Bcc"] = bbc
 
-                print("send mail")
+                encryption_key = entry_key.get()
+                encryption_iv = entry_iv.get()
 
-                key = ""
-                iv = ""
+                private_key, public_key = cryptor.generate_rsa_keys()
+
+                path = os.path.expanduser(os.getenv("USERPROFILE")) + "\\MailKeys\\"
+                if not os.path.exists(path):
+                    os.makedirs(path)
+
+                time = datetime.datetime.now().isoformat()
+
+                priv_file = ""
+                pub_file = ""
+
+                for char in f"PRIV_{time}":
+                    if char.isalnum():
+                        priv_file += char
+
+                for char in f"PUB_{time}":
+                    if char.isalnum():
+                        pub_file += char
+
+                f = open(path + priv_file + ".pem", "wb")
+                f.write(private_key.export_key("PEM"))
+                f.close()
+
+                f = open(path + pub_file + ".pem", "wb")
+                f.write(public_key.export_key("PEM"))
+                f.close()
 
                 # Neu message khong rong
                 if message != "":
@@ -185,35 +205,46 @@ def display_send_mail(username, password, list_reciever=None):
 
                     if crypto_type:
 
-                        if entry_key:
-                            # encrypted_key = encrypt_for_exchanging(entry_key.get(), )
-                            msg.add_header("CryptKey", entry_key.get())
-
-                        if entry_iv:
-                            msg.add_header("CryptInitial", entry_iv.get())
-
                         if crypto_type == "AES":
-                            body_mail = crypta.AES_Encrypt(
-                                body_mail, "0123456789abcdef", "0123456789abcdef"
-                            )
-                        elif crypto_type == "Caesar":
-                            body_mail = crypta.Caesar_Encrypt(
-                                body_mail, int(entry_key.get())
-                            )[: len(body_mail) - 1]
+                            body_mail = cryptor.AES_Encrypt(
+                                body_mail, encryption_key, encryption_iv
+                            ).decode()
 
                         elif crypto_type == "DES":
-                            body_mail = crypta.DES_Encrypt(
-                                body_mail, "12346578", "13245678"
+                            body_mail = cryptor.DES_Encrypt(
+                                body_mail, encryption_key, encryption_iv
+                            ).decode()
+
+                        elif crypto_type == "CAESAR":
+                            body_mail = cryptor.Caesar_Encrypt(
+                                body_mail, int(encryption_key)
+                            )[: len(body_mail) - 1]
+
+                        elif crypto_type == "VIGENERE":
+                            text = str(body_mail.lower())
+                            key = str(entry_key.get()).lower().replace(" ", "")
+
+                            handled_text = unidecode.unidecode(text)
+                            handled_key = unidecode.unidecode(key)
+
+                            body_mail = cryptor.Vigenere_Encrypt(
+                                handled_text, handled_key
                             )
 
-                        elif crypto_type == "Vigenere":
-                            body_mail = crypta.Vigenere_Encrypt(
-                                body_mail, int(entry_key.get())
-                            )
+                            # body_mail = cipher.encrypt(handled_text, handled_key)
+
+                    signature = cryptor.sign_message(body_mail.encode(), private_key)
+
+                    hex_signature = signature.hex()
+                    body_mail += hex_signature
 
                     # Định dạng message của mail theo kiểu plain text và lưu vào message_mail
-                    message_mail = MIMEText(body_mail, "html", "utf-8")
+                    message_mail = MIMEText(body_mail, "plain", "utf-8")
                     # part2 = MIMEText(html, "html")
+
+                    message_mail.add_header(
+                        "Signature-Verifier", public_key.export_key("DER").hex(),
+                    )
 
                     # Đính kèm nội dung mail đang được lưu trong par1 vào msg
                     msg.attach(message_mail)
@@ -228,11 +259,13 @@ def display_send_mail(username, password, list_reciever=None):
                         file = attachments[i]
                         file_basename = os.path.basename(file)
                         # Open PDF file in binary mode
-                        with open(file, "rb") as attachment:
-                            # Add file as application/octet-stream
-                            # Email client can usually download this automatically as attachment
-                            file_mail = MIMEBase("application", "octet-stream")
-                            file_mail.set_payload(attachment.read())
+                        attachment = open(file, "rb")
+                        attachment.seek(0)
+                        attachment_content = attachment.read()
+                        # Add file as application/octet-stream
+                        # Email client can usually download this automatically as attachment
+                        file_mail = MIMEBase("application", "octet-stream")
+                        file_mail.set_payload(attachment_content)
 
                         # Encode file in ASCII characters to send by email
                         encoders.encode_base64(file_mail)
@@ -244,6 +277,21 @@ def display_send_mail(username, password, list_reciever=None):
                             filename=("utf-8", "", file_basename),
                         )
                         msg.attach(file_mail)
+
+                        signature = cryptor.sign_message(
+                            attachment_content, private_key
+                        )
+
+                        hex_signature = signature.hex()
+
+                        file_mail.add_header(
+                            "Signature", hex_signature,
+                        )
+
+                        file_mail.add_header(
+                            "Signature-Verifier", public_key.export_key("DER").hex(),
+                        )
+                        attachment.close()
 
                 all_message = msg.as_string()
 
@@ -278,7 +326,7 @@ def display_send_mail(username, password, list_reciever=None):
         else:
             messagebox.showerror("Error", "Please specify at least one recipient.!")
 
-    GUI_send_mail.mainloop()
+    # GUI_send_mail.mainloop()
 
 
-display_send_mail("18520165@gm.uit.edu.vn", "1634608674")
+# display_send_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
