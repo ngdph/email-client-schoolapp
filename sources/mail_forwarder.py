@@ -30,7 +30,7 @@ To: {receivers}
 
     #### Nhóm "Mail người nhận"
     # Label "To"
-    label_to = Label(GUI_reply_mail, text="To (seperate with comma):")
+    label_to = Label(GUI_reply_mail, text="To:")
     label_to.place(x=20, y=10)
 
     # Entry "To"

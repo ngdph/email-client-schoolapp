@@ -19,7 +19,7 @@ def display_navigation(username, password):
 
     # button soan mail
     button_compose = Button(
-        GUI_navigation, text="Send Mail", command=event_pressed_send
+        GUI_navigation, text="Send mail", command=event_pressed_send
     )
     button_compose.place(x=5, y=10, width=290)
 
@@ -62,4 +62,4 @@ def display_navigation(username, password):
     button_signout.place(x=240, y=160)
 
 
-display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")
