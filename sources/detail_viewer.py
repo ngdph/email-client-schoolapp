@@ -3,10 +3,8 @@ from tkinter.ttk import Combobox, Treeview, Scrollbar
 import re
 import os
 import base64
-import threading
 
 # from cefpython3 import cefpython as cef
-import sys
 from crypt_box import decrypt_func
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
@@ -17,6 +15,7 @@ import cryptor
 def read_mail_func(username, password, mail):
     email_to = None
     email_content = None
+    original_email_content = None
     email_signature_key = None
     html_content = None
     email_attachments = []
@@ -32,20 +31,12 @@ def read_mail_func(username, password, mail):
     GUI_mail_reader.geometry("720x600")
     GUI_mail_reader.resizable(0, 0)
 
-    def html_to_data_uri(html=""):
-        html = html.encode("utf-8", "replace")
-        b64 = base64.b64encode(html).decode("utf-8", "replace")
-        ret = "data:text/html;base64,{data}".format(data=b64)
-        return ret
-
-        # cef.Shutdown()
-
     # Listbox Labels navigation
     label_sender = Label(GUI_mail_reader, text=f"From: {email_from}")
     label_sender.place(x=20, y=10)
 
     def event_pressed_decrypt():
-        decrypt_func(email_content.decode(), email_signature_key)
+        decrypt_func(original_email_content.decode(), email_signature_key)
 
     def event_pressed_save():
         for file in email_attachments:
@@ -116,19 +107,22 @@ def read_mail_func(username, password, mail):
         file_index = 0
         if content["contentType"] == "text/plain":
             email_content = content["payload"]
-
-        if content["contentType"] == "text/html":
-            html_content = html_to_data_uri(content["payload"].decode())
+            original_email_content = content["payload"]
 
         if content["Signature-Verifier"]:
             email_signature_key = content["Signature-Verifier"]
-            email_content = email_content[:-512]
+            if not email_content:
+                email_content = email_content[:-512]
+            if email_content:
+                try:
+                    test_hex = bytes.fromhex(email_content[-512:].decode())
+                    email_content = email_content[:-512]
+                except Exception as e:
+                    pass
 
         if content["filename"]:
             file_index += 1
             attachment = {"content": content, "verified": "Verified"}
-
-            print(content["Signature"])
 
             if content["Signature"]:
                 try:

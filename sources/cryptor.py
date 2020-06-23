@@ -12,15 +12,14 @@ import unidecode
 from secretpy import Caesar, Vigenere
 from secretpy import alphabets
 
-
+# Khởi tạo đối tượng SHA256 và đối tượng RSAKey với tham số là private key của người gửi
+# Gọi hàm update + đối số và message để hash message và khi đó đối tượng SHA256 trả về message đã hash
+# Gọi hàm sign của RSAKey và truyền tham số là đoạn hash => trả về chữ ký
 def sign_message(message, private_key):
     signer = pkcs1_15.new(private_key)
-
     hashed_m = SHA256.new()
     hashed_m.update(message)
-
     signature = signer.sign(hashed_m)
-
     return signature
 
 
@@ -206,13 +205,10 @@ def Vigenere_Decrypt(text, key):
     return res
 
 
-# Put your text
-# text1 = "thels jlkj lethe lkjslektj the"
-# text_dec = "xdvbm nhbz ripyu rofjbyqxf jbk"
-# # Put your key
-# key = "ewrqug"
+def XOR_Encrypt(data, key):
+    encrypted_bytes = bytes()
 
-# if len(key) <= len(text1):
-#     big_key = key * (len(text1) // len(key)) + key[: len(text1) % len(key)]
-#     text_encrypt = encrypt(text1, big_key)
-#     text_decrypt = decrypt(text_dec, big_key)
+    encrypted_bytes.join(
+        [data[index] ^ key[index % len(data)] for index in range(0, len(data))]
+    )
+

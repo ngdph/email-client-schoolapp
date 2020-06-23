@@ -8,8 +8,9 @@ from mail_sender import display_send_mail
 def display_navigation(username, password):
     # tạo form option
     GUI_navigation = Tk()
-    GUI_navigation.title("Navigate")
-    GUI_navigation.geometry("300x500")
+    GUI_navigation.title("Navigation")
+    GUI_navigation.geometry("300x200")
+    GUI_navigation.resizable(0, 0)
 
     # chuyển qua tab soạn mail
     def event_pressed_send():
@@ -57,8 +58,6 @@ def display_navigation(username, password):
     )
     button_signout.place(x=1, y=1)
     button_signout.place(x=240, y=160)
-
-    # GUI_navigation.mainloop()
 
 
 # display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")

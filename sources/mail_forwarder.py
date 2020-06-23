@@ -14,6 +14,7 @@ def display_forward_mail(username, password, subject, sender, receivers=[], cont
     GUI_reply_mail = Tk()
     GUI_reply_mail.title(subject)
     GUI_reply_mail.geometry("500x400")
+    GUI_reply_mail.resizable(0, 0)
 
     newContent = f"""
 -----------Forwarded message-----------

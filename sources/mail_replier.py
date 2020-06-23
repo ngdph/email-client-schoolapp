@@ -9,10 +9,12 @@ from email.mime.text import MIMEText
 
 import smtplib, email, base64, os
 
+
 def display_reply_mail(username, password, title, receivers, content=""):
     GUI_reply_mail = Tk()
     GUI_reply_mail.title(title)
     GUI_reply_mail.geometry("500x400")
+    GUI_reply_mail.resizable(0, 0)
 
     newContent = f"""
 

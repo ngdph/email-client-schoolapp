@@ -109,4 +109,4 @@ def display_read_mail(username, password):
     # GUI_read_mail.mainloop()
 
 
-# display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")

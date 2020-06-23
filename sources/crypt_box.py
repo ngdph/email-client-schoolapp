@@ -33,10 +33,11 @@ def decrypt_func(mail_content="", pub_key=""):
             public_key.verify(hashed_m, signature)
 
         except Exception as e:
-            print("This message had been tampered", e)
+            print("This message is invalid", e)
 
     def event_pressed_decrypt():
         selection = combobox_select_crypto.get()
+        print(iv.get(), key.get())
 
         if selection == "CAESAR":
             plain_message = cryptor.Caesar_Decrypt(cipher_message, int(key.get()))
@@ -51,6 +52,9 @@ def decrypt_func(mail_content="", pub_key=""):
         if selection == "DES":
             plain_message = cryptor.DES_Decrypt(cipher_message, key.get(), iv.get())
 
+        if not text_plaintext.compare("end-1c", "==", "1.0"):
+            text_plaintext.delete("1.0", END)
+
         text_plaintext.insert(
             INSERT,
             plain_message.decode()
@@ -58,9 +62,6 @@ def decrypt_func(mail_content="", pub_key=""):
             else plain_message,
             CHAR,
         )
-
-    def event_pressed_back(event):
-        pass
 
     text_ciphertext = Text(GUI_crypt_box, wrap="word", width=45, height=15)
     text_ciphertext.insert(INSERT, cipher_message, CHAR)
@@ -95,17 +96,11 @@ def decrypt_func(mail_content="", pub_key=""):
     iv.configure(state=DISABLED)
     iv.place(x=150, y=340)
 
-    ### button để quay lại tab navigation
-    button_back = Button(
-        GUI_crypt_box, text="Back", command=event_pressed_back, width=10
-    )
-    button_back.place(x=20, y=520)
-
     # Button send
     button_decrypt = Button(
         GUI_crypt_box, text="Decrypt", command=event_pressed_decrypt, width=10
     )
-    button_decrypt.place(x=700, y=520)
+    button_decrypt.place(x=350, y=520)
 
     def event_selected_crypto(event):
         selected_type = combobox_select_crypto.get()
