@@ -22,13 +22,6 @@ def read_mail_func(username, password, mail):
     email_attachments = []
     subject = mail["subject"]
 
-    def html_to_data_uri(html):
-        html = html.encode("utf-8", "replace")
-        b64 = base64.b64encode(html).decode("utf-8", "replace")
-        ret = b"data:text/html;base64,{data}".format(data=b64)
-
-        return ret
-
     try:
         email_from = re.search("<(.*)>", mail["from"]).group(1)
     except:
@@ -175,4 +168,4 @@ def read_mail_func(username, password, mail):
     text_message.configure(state=DISABLED)
     text_message.place(x=20, y=30)
 
-    # GUI_mail_reader.mainloop()
+    #GUI_mail_reader.mainloop()

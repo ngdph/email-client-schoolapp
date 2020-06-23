@@ -52,6 +52,7 @@ class Authenticate:
         self.label_account_password.place(x=100, y=50)
 
         self.entry_account_id = Entry(GUI_login)
+        self.entry_account_id.focus()
         self.entry_account_id.place(x=250, y=10, width=200)
 
         self.entry_account_password = Entry(GUI_login, show="*")
