@@ -86,9 +86,13 @@ def display_send_mail(username, password, list_reciever=None):
             or combobox_select_crypto.get() == "DES"
         ):
             entry_iv.configure(state=NORMAL)
-
         else:
             entry_iv.configure(state=DISABLED)
+
+        if combobox_select_crypto.get() != "None":
+            entry_key.configure(state=NORMAL)
+        else:
+            entry_key.configure(state=DISABLED)
 
     combobox_select_crypto = Combobox(
         GUI_send_mail,
@@ -100,7 +104,7 @@ def display_send_mail(username, password, list_reciever=None):
     combobox_select_crypto.bind("<<ComboboxSelected>>", event_changed_crypto)
     combobox_select_crypto.place(x=100, y=380)
 
-    entry_key = Entry(GUI_send_mail, width=35)
+    entry_key = Entry(GUI_send_mail, width=35, state=DISABLED)
     entry_key.place(x=100, y=410)
 
     entry_iv = Entry(GUI_send_mail, width=35, state=DISABLED)

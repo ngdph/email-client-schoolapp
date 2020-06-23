@@ -27,7 +27,7 @@ def read_mail_func(username, password, mail):
         email_from = mail["from"]
 
     GUI_mail_reader = Tk()
-    GUI_mail_reader.title(mail["subject"])
+    GUI_mail_reader.title(mail["subject"] if mail["subject"] else "No subject")
     GUI_mail_reader.geometry("720x600")
     GUI_mail_reader.resizable(0, 0)
 
@@ -162,4 +162,5 @@ def read_mail_func(username, password, mail):
     text_message.configure(state=DISABLED)
     text_message.place(x=20, y=30)
 
-    #GUI_mail_reader.mainloop()
+    # GUI_mail_reader.mainloop()
+
