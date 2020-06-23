@@ -32,10 +32,18 @@ def display_pressed_about():
     )
 
 
+def display_pressed_Feedback():
+    messagebox.showinfo(
+        "Send feedback",
+        "Have feedback? We'd love to hear it, but please don't share sensitive information. Have questions or legal concerns? Try help or support at A14_PSY_SQUAD@gmail.com",
+    )
+
+
 class Authenticate:
     def __init__(self, GUI_login):
         # form login
         GUI_login.geometry("500x200")
+        GUI_login.resizable(0, 0)
         GUI_login.title("Authentication")
 
         # tạo và place Label ID và pass
@@ -44,6 +52,8 @@ class Authenticate:
 
         menu_about = Menu(GUI_login)
         menu_about.add_command(label="About", command=display_pressed_about)
+        menu_about.add_command(label="Feedback", command=display_pressed_Feedback)
+
         GUI_login.config(menu=menu_about)
 
         self.label_account_password = Label(
@@ -52,6 +62,7 @@ class Authenticate:
         self.label_account_password.place(x=100, y=50)
 
         self.entry_account_id = Entry(GUI_login)
+        self.entry_account_id.focus()
         self.entry_account_id.place(x=250, y=10, width=200)
 
         self.entry_account_password = Entry(GUI_login, show="*")
@@ -108,7 +119,7 @@ class Authenticate:
         connect = Email(username, password)
         login_status = connect.login()
 
-        if login_status is not False:
+        if login_status:
             self.GUI_login.destroy()
             display_navigation(username, password)
         else:

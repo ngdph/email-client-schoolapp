@@ -1,6 +1,4 @@
 from tkinter import *
-from tkinter.ttk import *
-from tkinter import filedialog
 from mail_receiver import *
 from detail_viewer import read_mail_func
 import threading
@@ -9,7 +7,7 @@ import threading
 def display_read_mail(username, password):
     # instance of tk
     GUI_read_mail = Tk()
-    GUI_read_mail.title("Đọc Mail")
+    GUI_read_mail.title("Manage mail")
     GUI_read_mail.geometry("700x400")
     GUI_read_mail.resizable(0, 0)
 
@@ -50,8 +48,9 @@ def display_read_mail(username, password):
         fetch_subjects_func(listbox_labels_gmail.curselection()[0])
 
     def get_subjects(event):
-        thread = threading.Thread(target=extract_subjects_by_label_func)
-        thread.start()
+        # thread = threading.Thread(target=extract_subjects_by_label_func)
+        # thread.start()
+        extract_subjects_by_label_func()
 
     # Back button
     def event_pressed_back():
@@ -61,7 +60,6 @@ def display_read_mail(username, password):
         navigation.display_navigation(username, password)
 
     def view_mail_func(event):
-        print(listbox_subject_mails.curselection()[0])
         read_mail_func(
             username, password, mails[listbox_subject_mails.curselection()[0]]
         )
@@ -69,22 +67,21 @@ def display_read_mail(username, password):
     def on_close():
         threads = threading.enumerate()
 
-        for thread in threads:
-            thread._stop()
+        # for thread in threads:
+        #     thread._stop.
 
     # Listbox Labels navigation
     label_gmail = Label(GUI_read_mail, text="Labels")
     label_gmail.place(x=10, y=10)
 
     listbox_labels_gmail = Listbox(
-        GUI_read_mail, selectborderwidth=7, font=("Times New Roman", 12)
+        GUI_read_mail, selectborderwidth=4, font=("Times New Roman", 12)
     )
-    listbox_labels_gmail.place(x=10, y=30)
+    listbox_labels_gmail.place(x=10, y=35)
 
     # interate labels loop and insert it to listbox_labels_gmail
     lb_index = 0
     for lb in labels:
-        print(lb, type(lb))
         listbox_labels_gmail.insert(lb_index, f"{lb}")
         lb_index += 1
 
@@ -98,13 +95,18 @@ def display_read_mail(username, password):
     listbox_subject_mails = Listbox(
         GUI_read_mail, selectborderwidth=6, font=("Times New Roman", 12), width=55
     )
-    listbox_subject_mails.place(x=210, y=30)
+    listbox_subject_mails.place(x=210, y=35)
 
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
 
-    GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
-    GUI_read_mail.mainloop()
+    button_back = Button(
+        GUI_read_mail, text="Back", command=event_pressed_back, width=10
+    )
+    button_back.place(x=600, y=370)
+
+    # GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
+    # GUI_read_mail.mainloop()
 
 
-display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
+# display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")

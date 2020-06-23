@@ -9,14 +9,12 @@ from email.mime.text import MIMEText
 
 import smtplib, email, base64, os
 
-from AES import *
-from Caesar import *
-
 
 def display_forward_mail(username, password, subject, sender, receivers=[], content=""):
     GUI_reply_mail = Tk()
     GUI_reply_mail.title(subject)
     GUI_reply_mail.geometry("500x400")
+    GUI_reply_mail.resizable(0, 0)
 
     newContent = f"""
 -----------Forwarded message-----------
@@ -32,7 +30,7 @@ To: {receivers}
 
     #### Nhóm "Mail người nhận"
     # Label "To"
-    label_to = Label(GUI_reply_mail, text="To (seperate with comma):")
+    label_to = Label(GUI_reply_mail, text="To:")
     label_to.place(x=20, y=10)
 
     # Entry "To"
