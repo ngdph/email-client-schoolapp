@@ -25,7 +25,7 @@ def display_navigation(username, password):
 
     # Label chú thích soạn mail
     label_depict_sendmail = Label(
-        GUI_navigation, text="Dùng SMTP để gửi mail, có hỗ trợ attachment."
+        GUI_navigation, text="Using SMTP for sending email, attachment files."
     )
     label_depict_sendmail.place(x=5, y=40)
 
@@ -35,11 +35,13 @@ def display_navigation(username, password):
         display_read_mail(username, password)
 
     # button đọc mail
-    button_read = Button(GUI_navigation, text="Đọc mail", command=event_pressed_read)
+    button_read = Button(GUI_navigation, text="Manage mail", command=event_pressed_read)
     button_read.place(x=5, y=80, width=290)
 
     # Label chú thích đọc mail
-    label_depict_readmail = Label(GUI_navigation, text="Dùng IMAP4 để đọc mail.")
+    label_depict_readmail = Label(
+        GUI_navigation, text="Using IMAP4 for receiving and reading mail."
+    )
     label_depict_readmail.place(x=5, y=110)
 
     ###button Log out
