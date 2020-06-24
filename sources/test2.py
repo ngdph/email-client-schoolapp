@@ -133,3 +133,8 @@
 # t = "asdfkjas;lfkjwelkfjwefk"
 
 # print
+
+import mail_receiver
+
+ids = mail_receiver.get_emails_id("nguyen.dphux@gmail.com", "Ilovesex123*", "[Gmail]/All Mail")
+print(len(ids))

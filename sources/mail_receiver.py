@@ -229,3 +229,9 @@ def get_emails(username, password, label):
 # labels = get_labels()
 # print(labels, type(labels))
 # get_emails("[Gmail]/Starred")
+
+
+mail = imaplib.IMAP4_SSL(SERVER)
+mail.login("nguyen.dphux@gmail.com", "Ilovesex123*")
+listf = mail.list()
+print(listf)
