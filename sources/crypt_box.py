@@ -1,5 +1,5 @@
-from tkinter import *
-from tkinter.ttk import Combobox
+from tkinter import *, Button, Entry, Text, Tk, messagebox
+from tkinter.ttk import Combobox, Label
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
@@ -13,7 +13,7 @@ def decrypt_func(mail_content="", pub_key=""):
     cipher_message = None
     public_key = None
 
-    GUI_crypt_box = Tk()
+    GUI_crypt_box = Tk() 
     GUI_crypt_box.title("Cryptbox")
     GUI_crypt_box.geometry("800x600")
     GUI_crypt_box.resizable(0, 0)
@@ -34,6 +34,7 @@ def decrypt_func(mail_content="", pub_key=""):
 
         except Exception as e:
             print("This message is invalid", e)
+            messagebox.showerror("The signature of this mail is invalid.",)
 
     def event_pressed_decrypt():
         selection = combobox_select_crypto.get()

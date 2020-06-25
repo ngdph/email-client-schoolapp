@@ -233,5 +233,14 @@ def get_emails(username, password, label):
 
 mail = imaplib.IMAP4_SSL(SERVER)
 mail.login("nguyen.dphux@gmail.com", "Ilovesex123*")
-listf = mail.list()
-print(listf)
+# new_label = mail.create("Work")
+
+mail.select("Work")
+status, data = mail.search(None, "ALL")
+id = data[0]
+m_status, m_data = mail.fetch(id, "(RFC822)")
+print(m_data)
+# delete_label = mail.delete("Work")
+# print(delete_label)
+# listf = mail.list()
+# print(listf)
