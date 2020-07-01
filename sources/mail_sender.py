@@ -177,28 +177,26 @@ def display_send_mail(username, password, list_reciever=None):
 
                 private_key, public_key = cryptor.generate_rsa_keys()
 
-                path = os.path.expanduser(os.getenv("USERPROFILE")) + "\\MailKeys\\"
+                time = datetime.datetime.now().isoformat()
+
+                time_name = ""
+                for char in f"{time}":
+                    if char.isalnum():
+                        time_name += char
+
+                path = (
+                    os.path.expanduser(os.getenv("USERPROFILE"))
+                    + "\\MailKeys\\"
+                    + time_name
+                )
                 if not os.path.exists(path):
                     os.makedirs(path)
 
-                time = datetime.datetime.now().isoformat()
-
-                priv_file = ""
-                pub_file = ""
-
-                for char in f"PRIV_{time}":
-                    if char.isalnum():
-                        priv_file += char
-
-                for char in f"PUB_{time}":
-                    if char.isalnum():
-                        pub_file += char
-
-                f = open(path + priv_file + ".pem", "wb")
+                f = open(path + "\\key.priv", "wb")
                 f.write(private_key.export_key("PEM"))
                 f.close()
 
-                f = open(path + pub_file + ".pem", "wb")
+                f = open(path + "\\key.pub", "wb")
                 f.write(public_key.export_key("PEM"))
                 f.close()
 
@@ -240,14 +238,16 @@ def display_send_mail(username, password, list_reciever=None):
                     signature = cryptor.sign_message(body_mail.encode(), private_key)
 
                     hex_signature = signature.hex()
-                    body_mail += hex_signature
+                    # body_mail += hex_signature
 
                     # Định dạng message của mail theo kiểu plain text và lưu vào message_mail
                     message_mail = MIMEText(body_mail, "plain", "utf-8")
                     # part2 = MIMEText(html, "html")
 
+                    message_mail.add_header("Signature", hex_signature)
+
                     message_mail.add_header(
-                        "Signature-Verifier", public_key.export_key("DER").hex(),
+                        "Signature-Verifier", public_key.export_key("DER").hex()
                     )
 
                     # Đính kèm nội dung mail đang được lưu trong par1 vào msg
@@ -330,7 +330,8 @@ def display_send_mail(username, password, list_reciever=None):
         else:
             messagebox.showerror("Error", "Please specify at least one recipient.!")
 
-    # GUI_send_mail.mainloop()
+    GUI_send_mail.mainloop()
 
 
-# display_send_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+display_send_mail("nhanth240500@gmail.com", "@177687Nhan@")
+

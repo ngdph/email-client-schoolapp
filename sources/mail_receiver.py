@@ -46,8 +46,8 @@ def get_labels(username, password):
 
         # re.findall sẽ trả về list ['/', 'INBOX'] với INBOX là tên label tương ứng với chuỗi xử lý, vì ở cuối nên ta để index là [-1] để lấy phần tử cuối
         LABELS.append(LABEL)
-
-    return LABELS[2:]
+    print(LABELS)
+    return LABELS
 
 
 def get_emails_id(username, password, label):
@@ -67,7 +67,7 @@ def get_emails_id(username, password, label):
     for block in data:
         mail_ids = block.split()
 
-    return mail_ids
+    return mail_ids[-7:]
 
 
 def get_emails(username, password, label):
@@ -180,7 +180,11 @@ def get_emails(username, password, label):
                         data_part["Signature"] = (
                             data["Signature"] if data["Signature"] else None
                         )
-                        data_part["Signature-Verifier"] = data["Signature-Verifier"]
+                        data_part["Signature-Verifier"] = (
+                            data["Signature-Verifier"]
+                            if data["Signature-Verifier"]
+                            else None
+                        )
 
                         filename = ""
 
@@ -216,7 +220,11 @@ def get_emails(username, password, label):
                     data_part["Signature"] = (
                         message["Signature"] if message["Signature"] else None
                     )
-                    mail_data["Signature-Verifier"] = message["Signature-Verifier"]
+                    mail_data["Signature-Verifier"] = (
+                        message["Signature-Verifier"]
+                        if message["Signature-Verifier"]
+                        else None
+                    )
 
         # Append vào danh sách mail
         mails["mails"].append(mail_data)
@@ -231,16 +239,14 @@ def get_emails(username, password, label):
 # get_emails("[Gmail]/Starred")
 
 
-mail = imaplib.IMAP4_SSL(SERVER)
-mail.login("nguyen.dphux@gmail.com", "Ilovesex123*")
-# new_label = mail.create("Work")
+# mail = imaplib.IMAP4_SSL(SERVER)
+# # new_label = mail.create("Work")
 
-mail.select("Work")
-status, data = mail.search(None, "ALL")
-id = data[0]
-m_status, m_data = mail.fetch(id, "(RFC822)")
-print(m_data)
-# delete_label = mail.delete("Work")
-# print(delete_label)
-# listf = mail.list()
-# print(listf)
+# mail.select("Work")
+# status, data = mail.search(None, "ALL")
+# id = data[0]
+# m_status, m_data = mail.fetch(id, "(RFC822)")
+# # delete_label = mail.delete("Work")
+# # print(delete_label)
+# # listf = mail.list()
+# # print(listf)

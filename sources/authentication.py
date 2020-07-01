@@ -9,16 +9,22 @@ class Email:
     def __init__(self, account_id, account_password):
         self.username = account_id
         self.password = account_password
+
         import smtplib
+        import imaplib
 
         self.smtp = smtplib.SMTP("smtp.gmail.com", 587)
+        self.imap = imaplib.IMAP4_SSL("imap.gmail.com")
 
     def login(self):
         try:
-            self.smtp.connect("smtp.gmail.com", 587)
+            self.smtp.connection("smtp.gmail.com", 587)
             self.smtp.ehlo()
             self.smtp.starttls()
             self.smtp.login(self.username, self.password)
+
+            self.imap.login(self.username, self.password)
+
             return True
         except:
             return False
@@ -69,7 +75,7 @@ class Authenticate:
         self.entry_account_password.place(x=250, y=50, width=200)
 
         # make connection toi Gmail
-        self.button_login = Button(GUI_login, text="Log In", command=self.connect)
+        self.button_login = Button(GUI_login, text="Log In", command=self.connection)
         self.button_login.place(x=200, y=100)
 
         # label please turn on less secure app on Gmail before login
@@ -112,19 +118,19 @@ class Authenticate:
         )
         self.GUI_login = GUI_login
 
-    def connect(self):
+    def connection(self):
 
         username = self.entry_account_id.get()
         password = self.entry_account_password.get()
-        connect = Email(username, password)
-        login_status = connect.login()
+        connection = Email(username, password)
+        login_status = connection.login()
 
         if login_status:
             self.GUI_login.destroy()
-            display_navigation(username, password)
+            display_navigation(username, password, connection)
         else:
             messagebox.showerror(
-                "Could not connect, please try again",
+                "Could not connection, please try again",
                 "Username or password is invalid.",
             )
 

@@ -1,11 +1,11 @@
 from tkinter import *
 
 
-from mail_reader import display_read_mail
+from mail_manager import display_read_mail
 from mail_sender import display_send_mail
 
 
-def display_navigation(username, password):
+def display_navigation(username, password, connection):
     # tạo form option
     GUI_navigation = Tk()
     GUI_navigation.title("Navigation")

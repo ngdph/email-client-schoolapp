@@ -13,11 +13,11 @@ import cryptor
 
 
 def read_mail_func(username, password, mail):
-    email_to = None
-    email_content = None
-    original_email_content = None
-    email_signature_key = None
-    html_content = None
+    email_to = ""
+    email_content = ""
+    email_signature = ""
+    email_signature_key = ""
+    html_content = ""
     email_attachments = []
     subject = mail["subject"]
 
@@ -36,7 +36,8 @@ def read_mail_func(username, password, mail):
     label_sender.place(x=20, y=10)
 
     def event_pressed_decrypt():
-        decrypt_func(original_email_content.decode(), email_signature_key)
+        print(email_signature, email_signature_key)
+        decrypt_func(email_content.decode(), email_signature, email_signature_key)
 
     def event_pressed_save():
         for file in email_attachments:
@@ -107,18 +108,12 @@ def read_mail_func(username, password, mail):
         file_index = 0
         if content["contentType"] == "text/plain":
             email_content = content["payload"]
-            original_email_content = content["payload"]
+
+        if content["Signature"]:
+            email_signature = content["Signature"]
 
         if content["Signature-Verifier"]:
             email_signature_key = content["Signature-Verifier"]
-            if not email_content:
-                email_content = email_content[:-512]
-            if email_content:
-                try:
-                    test_hex = bytes.fromhex(email_content[-512:].decode())
-                    email_content = email_content[:-512]
-                except Exception as e:
-                    pass
 
         if content["filename"]:
             file_index += 1
@@ -143,7 +138,7 @@ def read_mail_func(username, password, mail):
                     attachment["verified"] = "Invalid"
 
             else:
-                attachment["verified"] = "No signature"
+                attachment["verified"] = "No signature found"
 
             treeview.insert(
                 "",

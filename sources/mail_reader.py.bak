@@ -2,6 +2,7 @@ from tkinter import *
 from mail_receiver import *
 from detail_viewer import read_mail_func
 import threading
+import imaplib
 
 
 def display_read_mail(username, password):
@@ -70,6 +71,28 @@ def display_read_mail(username, password):
         # for thread in threads:
         #     thread._stop.
 
+    def event_Search():
+
+        mail = imaplib.IMAP4_SSL("imap.gmail.com")
+        mail.login(username, password)
+        mail.select("[Gmail]/All Mail")
+        listSearch = list()
+        # subj = SearchEnt.get()
+        rv, ids = mail.search(
+            None, '(OR (TO "18520326@gm.uit.edu.vn") (FROM "18520165@gm.uit.edu.vn"))'
+        )
+        # if subj:
+        #         listbox_subject_mails.delete(0,END)
+        #         fetch_subjects_func(listbox_labels_gmail.curselection()[0])
+        #         return
+
+        # for mail in listbox_subject_mails.get(0, END):
+        #     if  subj == mail:
+        #         listSearch.append(subj)
+        # listbox_subject_mails.delete(0,END)
+        # for items in listSearch:
+        #     listbox_subject_mails.insert(END,items)
+
     # Listbox Labels navigation
     label_gmail = Label(GUI_read_mail, text="Labels")
     label_gmail.place(x=10, y=10)
@@ -105,8 +128,16 @@ def display_read_mail(username, password):
     )
     button_back.place(x=600, y=370)
 
+    # Entry Search
+    SearchEnt = Entry(GUI_read_mail)
+    SearchEnt.place(x=300, y=370)
+
+    # Button Search
+    button_Search = Button(GUI_read_mail, text="Search", command=event_Search)
+    button_Search.place(x=350, y=370)
+
     # GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
-    # GUI_read_mail.mainloop()
+    GUI_read_mail.mainloop()
 
 
-# display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
+display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
