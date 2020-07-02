@@ -70,6 +70,26 @@ def get_emails_id(username, password, label):
     return mail_ids[-7:]
 
 
+def search_emails_id(username, password, label, search_query):
+
+    mail = imaplib.IMAP4_SSL(SERVER)
+    mail.login(username, password)
+
+    mail.select(f'"{label}"')
+
+    status, data = mail.search(None, search_query)
+
+    mails = {"label": "", "mails": []}
+    mails["label"] = label
+
+    mail_ids = []
+
+    for block in data:
+        mail_ids = block.split()
+
+    return mail_ids[-7:]
+
+
 def get_emails(username, password, label):
 
     mail = imaplib.IMAP4_SSL(SERVER)

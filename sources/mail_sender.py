@@ -312,15 +312,16 @@ def display_send_mail(username, password, list_reciever=None):
                     # Tiến hành gửi mail từ người gửi tới người nhận, message được định dang theo string.
                     server.sendmail(username, receiver_email, all_message)
 
+                    messagebox.showinfo("Success", "Sent!")
+                    server.quit()
+
                     # Trong trường hợp có lỗi khi kết nối tới server của SMTP hoặc xảy ra bất kì lỗi gì trong quá trình xử lí
                     # Sẽ xuất thông báo lỗi
                 except Exception as e:
 
                     print(e)
 
-                finally:
-                    messagebox.showinfo("Success", "Sent!")
-                    server.quit()
+                    messagebox.showinfo("Error", "Could not send email!")
 
             # Khong co message va file
             else:

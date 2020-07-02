@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import messagebox
 from tkinter.ttk import Combobox, Label
-from Crypto.Hash import SHA256
+from Crypto.Hash import SHA256, SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.IO import PEM

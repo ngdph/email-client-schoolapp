@@ -1,5 +1,5 @@
 from tkinter import *
-from tkinter import simpledialog
+from tkinter import simpledialog, messagebox
 from mail_receiver import *
 from detail_viewer import read_mail_func
 import threading
@@ -35,7 +35,7 @@ def display_read_mail(username, password):
         temp_mails_ids = get_emails_id(username, password, mail_labels[index_of_label])
         mail_index = 0
 
-        # Xoá hết mail khi chọn label mới
+        # Clear all mails when choosing other label
         # mails.clear()
         # mails_ids.clear()
 
@@ -128,6 +128,8 @@ def display_read_mail(username, password):
         )
 
     def event_search():
+        global label_index
+
         if entry_search.get():
             if entry_search.get().strip():
                 query = [word for word in entry_search.get().split(" ") if word.strip()]
@@ -152,7 +154,43 @@ def display_read_mail(username, password):
                             else "(" + query[0] + ' "' + query[2] + '")'
                         )
 
-                        pass
+                        # result = search_emails(
+                        #     username, password, mail_labels[label_index], search_string
+                        # )
+                        # Xác định label
+                        # Lấy mail từ label
+                        # get_mails trả về dict chứa label và mails
+                        # Lấy value trong key mails
+                        temp_mails = search_emails(
+                            username, password, mail_labels[label_index], search_string
+                        )["mails"]
+                        temp_mails_ids = search_emails_id(
+                            username, password, mail_labels[label_index], search_string
+                        )
+                        mail_index = 0
+
+                        # Clear all mails when choosing other label
+                        # mails.clear()
+                        # mails_ids.clear()
+
+                        mails_ids = temp_mails_ids
+                        # Append mail subject to list box subject
+                        for index, mail in enumerate(temp_mails):
+                            mails.append(mail)
+
+                            mail_subject = ""
+                            if mail["subject"]:
+                                mail_subject = mail["subject"]
+                            else:
+                                mail_subject = "No subject"
+
+                            listbox_subject_mails.insert(
+                                mail_index, (mail_subject, temp_mails_ids[index])
+                            )
+                            mail_index += 1
+
+        else:
+            messagebox.showerror("Error", "Search input is invalid.")
 
     def on_close():
         threads = threading.enumerate()
@@ -223,6 +261,6 @@ def display_read_mail(username, password):
     GUI_read_mail.mainloop()
 
 
-# display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
-display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
+# display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
 
