@@ -4,6 +4,7 @@ from mail_receiver import *
 from detail_viewer import read_mail_func
 import threading
 from imapclient import IMAPClient
+import pyisemail
 
 # from future.moves.tkinter import simpledialog
 
@@ -126,6 +127,33 @@ def display_read_mail(username, password):
             username, password, mails[listbox_subject_mails.curselection()[0]]
         )
 
+    def event_search():
+        if entry_search.get():
+            if entry_search.get().strip():
+                query = [word for word in entry_search.get().split(" ") if word.strip()]
+
+                if len(query) == 3:
+                    if (
+                        (
+                            query[0] == "FROM"
+                            or query[0] == "TO"
+                            or query[0] == "SUBJECT"
+                        )
+                        and query[1] == ":"
+                        and (
+                            (pyisemail.is_email(query[2]) and query[0] != "SUBJECT")
+                            or (query[2].strip() and query[0] == "SUBJECT")
+                        )
+                    ):
+
+                        search_string = (
+                            r'(X-GM-RAW "subject:\"' + query[2] + '"")'
+                            if query[0] == "SUBJECT"
+                            else "(" + query[0] + ' "' + query[2] + '")'
+                        )
+
+                        pass
+
     def on_close():
         threads = threading.enumerate()
 
@@ -136,20 +164,19 @@ def display_read_mail(username, password):
     # label_gmail = Label(GUI_read_mail, text="Labels")
     # label_gmail.place(x=10, y=10)
 
-    button_create_label = Button(
-        GUI_read_mail, text="New mailbox", command=create_mailbox
-    )
-    button_create_label.place(x=10, y=370)
+    # compose_search = Button(GUI_read_mail, text="Send mail")
+    # compose_search.place(x=45, y=15, width=100, height=30)
 
-    button_delete_label = Button(
-        GUI_read_mail, text="Delete mailbox", command=delete_mailbox
-    )
-    button_delete_label.place(x=100, y=370)
+    entry_search = Entry(GUI_read_mail, width=60)
+    entry_search.place(x=210, y=19)
+
+    button_search = Button(GUI_read_mail, text="Search", width=10, command=event_search)
+    button_search.place(x=585, y=15)
 
     listbox_labels_gmail = Listbox(
         GUI_read_mail, selectborderwidth=4, font=("Times New Roman", 12), width=20
     )
-    listbox_labels_gmail.place(x=10, y=75)
+    listbox_labels_gmail.place(x=10, y=55)
 
     # interate mail_labels loop and insert it to listbox_labels_gmail
     lb_index = 0
@@ -167,10 +194,20 @@ def display_read_mail(username, password):
     listbox_subject_mails = Listbox(
         GUI_read_mail, selectborderwidth=6, font=("Times New Roman", 12), width=55
     )
-    listbox_subject_mails.place(x=210, y=35)
+    listbox_subject_mails.place(x=210, y=55)
 
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
+
+    button_create_label = Button(
+        GUI_read_mail, text="New mailbox", command=create_mailbox
+    )
+    button_create_label.place(x=10, y=370)
+
+    button_delete_label = Button(
+        GUI_read_mail, text="Delete mailbox", command=delete_mailbox
+    )
+    button_delete_label.place(x=100, y=370)
 
     button_back = Button(
         GUI_read_mail, text="Back", command=event_pressed_back, width=10

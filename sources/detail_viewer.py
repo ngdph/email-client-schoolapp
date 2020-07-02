@@ -4,7 +4,6 @@ import re
 import os
 import base64
 
-# from cefpython3 import cefpython as cef
 from crypt_box import decrypt_func
 from Crypto.Hash import SHA256
 from Crypto.PublicKey import RSA
