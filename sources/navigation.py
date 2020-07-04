@@ -62,4 +62,4 @@ def display_navigation(username, password, connection):
     button_signout.place(x=240, y=160)
 
 
-# display_navigation("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_navigation("nguyen.dphux@gmail.com", ".*")

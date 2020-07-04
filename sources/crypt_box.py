@@ -10,15 +10,15 @@ import unidecode
 import tkinter
 
 
-def decrypt_func(mail_content="", signature_hex="", pub_key_hex=""):
+def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
 
-    signature = ""
+    cipher_message = mail_content.decode()
     hashed_message = ""
-    cipher_message = ""
+    signature = ""
     public_key = ""
 
     GUI_crypt_box = Tk()
-    GUI_crypt_box.title("Cryptbox")
+    GUI_crypt_box.title("Crypt Box")
     GUI_crypt_box.geometry("800x600")
     GUI_crypt_box.resizable(0, 0)
 
@@ -32,7 +32,7 @@ def decrypt_func(mail_content="", signature_hex="", pub_key_hex=""):
             )
             public_key = pkcs1_15.new(pub_key)
 
-            cipher_message = mail_content
+            cipher_message = mail_content.decode()
 
             hashed_m = SHA256.new()
             hashed_m.update(cipher_message.encode())

@@ -25,10 +25,6 @@ def display_read_mail(username, password):
 
     # Get mail
     def fetch_subjects_func(index_of_label):
-        # Xác định label
-        # Lấy mail từ label
-        # get_mails trả về dict chứa label và mails
-        # Lấy value trong key mails
         temp_mails = get_emails(username, password, mail_labels[index_of_label])[
             "mails"
         ]
@@ -36,7 +32,7 @@ def display_read_mail(username, password):
         mail_index = 0
 
         # Clear all mails when choosing other label
-        # mails.clear()
+        mails.clear()
         # mails_ids.clear()
 
         mails_ids = temp_mails_ids
@@ -45,18 +41,16 @@ def display_read_mail(username, password):
             mails.append(mail)
 
             mail_subject = ""
-            if mail["subject"]:
-                mail_subject = mail["subject"]
+            if "Subject" in mail["header"]:
+                try:
+                    mail_subject = mail["header"]["Subject"].decode()
+                except:
+                    mail_subject = mail["header"]["Subject"]
             else:
-                mail_subject = "No subject"
+                mail_subject = "(No subject)"
 
-            listbox_subject_mails.insert(
-                mail_index, (mail_subject, temp_mails_ids[index])
-            )
+            listbox_subject_mails.insert(mail_index, mail_subject)
             mail_index += 1
-
-    def something():
-        mail_labels
 
     def create_mailbox():
         mailbox_name = simpledialog.askstring(
@@ -149,44 +143,33 @@ def display_read_mail(username, password):
                     ):
 
                         search_string = (
-                            r'(X-GM-RAW "subject:\"' + query[2] + '"")'
+                            r'(X-GM-RAW "subject:\"' + query[2] + r'\"")'
                             if query[0] == "SUBJECT"
                             else "(" + query[0] + ' "' + query[2] + '")'
                         )
 
-                        # result = search_emails(
-                        #     username, password, mail_labels[label_index], search_string
-                        # )
-                        # Xác định label
-                        # Lấy mail từ label
-                        # get_mails trả về dict chứa label và mails
-                        # Lấy value trong key mails
-                        temp_mails = search_emails(
-                            username, password, mail_labels[label_index], search_string
+                        temp_mails = get_emails(
+                            username, password, "[Gmail]/All Mail", search_string
                         )["mails"]
-                        temp_mails_ids = search_emails_id(
-                            username, password, mail_labels[label_index], search_string
+                        temp_mails_ids = get_emails_id(
+                            username, password, "[Gmail]/All Mail", search_string
                         )
                         mail_index = 0
 
-                        # Clear all mails when choosing other label
-                        # mails.clear()
-                        # mails_ids.clear()
+                        mails.clear()
+                        listbox_subject_mails.delete(0, "end")
 
                         mails_ids = temp_mails_ids
-                        # Append mail subject to list box subject
                         for index, mail in enumerate(temp_mails):
                             mails.append(mail)
 
                             mail_subject = ""
-                            if mail["subject"]:
-                                mail_subject = mail["subject"]
+                            if mail["header"]["Subject"]:
+                                mail_subject = mail["header"]["Subject"]
                             else:
-                                mail_subject = "No subject"
+                                mail_subject = "(No subject)"
 
-                            listbox_subject_mails.insert(
-                                mail_index, (mail_subject, temp_mails_ids[index])
-                            )
+                            listbox_subject_mails.insert(mail_index, mail_subject)
                             mail_index += 1
 
         else:
@@ -240,27 +223,27 @@ def display_read_mail(username, password):
     button_create_label = Button(
         GUI_read_mail, text="New mailbox", command=create_mailbox
     )
-    button_create_label.place(x=10, y=370)
+    button_create_label.place(x=10, y=390)
 
     button_delete_label = Button(
         GUI_read_mail, text="Delete mailbox", command=delete_mailbox
     )
-    button_delete_label.place(x=100, y=370)
+    button_delete_label.place(x=100, y=390)
 
     button_back = Button(
         GUI_read_mail, text="Back", command=event_pressed_back, width=10
     )
-    button_back.place(x=585, y=370)
+    button_back.place(x=585, y=390)
 
     button_delete = Button(
         GUI_read_mail, text="Delete", command=event_pressed_delete, width=10
     )
-    button_delete.place(x=490, y=370)
+    button_delete.place(x=490, y=390)
 
     # GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
     GUI_read_mail.mainloop()
 
 
 display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
-# display_read_mail("nguyen.dphux@gmail.com", "Ilovesex123*")
+# display_read_mail("nguyen.dphux@gmail.com", ".*")
 

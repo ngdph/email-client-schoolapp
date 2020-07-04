@@ -3,6 +3,7 @@ from tkinter.ttk import Combobox, Treeview, Scrollbar
 import re
 import os
 import base64
+import cgi
 
 from crypt_box import decrypt_func
 from Crypto.Hash import SHA256
@@ -18,15 +19,20 @@ def read_mail_func(username, password, mail):
     email_signature_key = ""
     html_content = ""
     email_attachments = []
-    subject = mail["subject"]
+    subject = mail["header"]["Subject"]
 
     try:
-        email_from = re.search("<(.*)>", mail["from"]).group(1)
+        email_from = mail["header"]["From"].decode()
     except:
-        email_from = mail["from"]
-
+        email_from = mail["header"]["From"]
     GUI_mail_reader = Tk()
-    GUI_mail_reader.title(mail["subject"] if mail["subject"] else "No subject")
+    GUI_mail_reader.title(
+        mail["header"]["Subject"].decode()
+        if mail["header"]["Subject"] and isinstance(mail["header"]["Subject"], bytes)
+        else mail["header"]["Subject"]
+        if mail["header"]["Subject"] and isinstance(mail["header"]["Subject"], str)
+        else "(No subject)"
+    )
     GUI_mail_reader.geometry("720x600")
     GUI_mail_reader.resizable(0, 0)
 
@@ -35,15 +41,15 @@ def read_mail_func(username, password, mail):
     label_sender.place(x=20, y=10)
 
     def event_pressed_decrypt():
-        print(email_signature, email_signature_key)
-        decrypt_func(email_content.decode(), email_signature, email_signature_key)
+        print(email_content)
+        decrypt_func(email_content, email_signature, email_signature_key)
 
     def event_pressed_save():
         for file in email_attachments:
             path = os.path.join("C:/Users", os.getlogin(), "Downloads", "Mailex")
             os.makedirs(path, exist_ok=True)
-            f = open(os.path.join(path, file["content"]["filename"]), "wb")
-            f.write(file["content"]["payload"])
+            f = open(os.path.join(path, file["filename"]), "wb")
+            f.write(file["payload"]["payload"])
             f.close()
 
     button_decrypt = Button(
@@ -103,49 +109,61 @@ def read_mail_func(username, password, mail):
     treeview.heading("File", text="File")
     treeview.heading("Verified", text="Verified status")
 
-    for content in mail["content"]:
+    for content in mail["payload"]:
         file_index = 0
-        if content["contentType"] == "text/plain":
+
+        if "text/plain" in content["header"]["Content-Type"]:
             email_content = content["payload"]
 
-        if content["Signature"]:
-            email_signature = content["Signature"]
+        if "Signature" in content["header"]:
+            email_signature = content["header"]["Signature"]
 
-        if content["Signature-Verifier"]:
-            email_signature_key = content["Signature-Verifier"]
+        if "Signature-Verifier" in content["header"]:
+            email_signature_key = content["header"]["Signature-Verifier"]
 
-        if content["filename"]:
-            file_index += 1
-            attachment = {"content": content, "verified": "Verified"}
+        if "Content-Disposition" in content["header"]:
+            value, params = cgi.parse_header(content["header"]["Content-Disposition"])
 
-            if content["Signature"]:
-                try:
-                    signature = bytes.fromhex(content["Signature"])
-                    pub = RSA.import_key(bytes.fromhex(content["Signature-Verifier"]))
-                    public_key = pkcs1_15.new(pub)
+            if "filename" in params:
+                filename = params["filename"]
 
-                    file = content["payload"]
+                file_index += 1
+                attachment = {
+                    "filename": filename,
+                    "payload": content,
+                    "verified": "Verified",
+                }
 
-                    hashed_f = SHA256.new()
-                    hashed_f.update(file)
+                if "Signature" in content["header"]:
+                    try:
+                        signature = bytes.fromhex(content["header"]["Signature"])
+                        pub = RSA.import_key(
+                            bytes.fromhex(content["header"]["Signature-Verifier"])
+                        )
+                        public_key = pkcs1_15.new(pub)
 
-                    public_key.verify(hashed_f, signature)
-                    attachment["verified"] = "Valid"
+                        file_data = content["payload"]
 
-                except Exception as e:
-                    print(e)
-                    attachment["verified"] = "Invalid"
+                        hashed_f = SHA256.new()
+                        hashed_f.update(file_data)
 
-            else:
-                attachment["verified"] = "No signature found"
+                        public_key.verify(hashed_f, signature)
+                        attachment["verified"] = "Valid"
 
-            treeview.insert(
-                "",
-                "end",
-                text=file_index,
-                values=(content["filename"], attachment["verified"]),
-            )
-            email_attachments.append(attachment)
+                    except Exception as e:
+                        print(e)
+                        attachment["verified"] = "Invalid"
+
+                else:
+                    attachment["verified"] = "No signature found"
+
+                treeview.insert(
+                    "",
+                    "end",
+                    text=file_index,
+                    values=(attachment["filename"], attachment["verified"]),
+                )
+                email_attachments.append(attachment)
 
     if not email_content:
         email_content = b"Not supported yet"
