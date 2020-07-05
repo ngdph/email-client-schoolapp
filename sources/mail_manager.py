@@ -11,44 +11,60 @@ import moving_dialog
 # from future.moves.tkinter import simpledialog
 
 label_index = 0
+section_index = 0
 
 
 def display_read_mail(username, password):
     # instance of tk
     GUI_read_mail = Tk()
     GUI_read_mail.title("Manage mail")
-    GUI_read_mail.geometry("700x430")
+    GUI_read_mail.geometry("700x480")
     GUI_read_mail.resizable(0, 0)
 
     mail_labels = get_labels(username, password)
     selected_mail_index = 0
     mails = []
-    mails_ids = []
+    mail_ids = []
+    mail_sections = []
+
+    current_mail = {}
 
     # Get mail
-    def fetch_subjects_func(index_of_label):
+    def fetch_subjects_func(index_of_label, index_of_section):
         nonlocal mails
-        nonlocal mails_ids
-        print(mail_labels[index_of_label])
-        temp_mails = get_emails(username, password, mail_labels[index_of_label])[
-            "mails"
-        ]
-        temp_mails_ids = get_emails_id(username, password, mail_labels[index_of_label])
+        nonlocal mail_ids
+        nonlocal mail_sections
 
-        # Clear all mails when choosing other label
         listbox_subject_mails.delete(0, END)
         mails.clear()
-        mails_ids.clear()
+        mail_ids.clear()
+        mail_sections.clear()
 
-        mails_ids = temp_mails_ids
-        # Append mail subject to list box subject
+        temp_mails_ids = get_emails_id(username, password, mail_labels[index_of_label])
+
+        temp_ids = [
+            temp_mails_ids[x : x + 10] for x in range(0, len(temp_mails_ids), 10)
+        ]
+
+        temp_sections = [index for index in range(0, len(temp_ids))]
+
+        mail_ids = temp_ids
+        mail_sections = temp_sections
+
+        temp_mails = get_email_headers(
+            username,
+            password,
+            mail_labels[index_of_label],
+            mail_ids[mail_sections[index_of_section]],
+        )
+
         for index, mail in enumerate(temp_mails):
             mails.append(mail)
 
             mail_subject = ""
-            if "Subject" in mail["header"]:
+            if "Subject" in mail:
 
-                subject = mail["header"]["Subject"]
+                subject = mail["Subject"]
 
                 if isinstance(subject, str):
                     if subject:
@@ -67,6 +83,10 @@ def display_read_mail(username, password):
                 mail_subject = "(No subject)"
 
             listbox_subject_mails.insert(index, mail_subject)
+
+        label_sections.configure(
+            text=f"{section_index + 1 if len(mail_sections) > 0 else 0 }/{len(mail_sections)}"
+        )
 
     def create_mailbox():
         mailbox_name = simpledialog.askstring(
@@ -94,10 +114,9 @@ def display_read_mail(username, password):
         mail_labels = get_labels(username, password)
 
         for lb_index, lb in enumerate(mail_labels):
-            print(lb, lb_index)
             listbox_labels_gmail.insert(lb_index, f"{lb}")
 
-        fetch_subjects_func(label_index)
+        fetch_subjects_func(label_index, section_index)
 
     def delete_mailbox():
         labels = mail_labels
@@ -116,14 +135,34 @@ def display_read_mail(username, password):
                 listbox_labels_gmail.insert(lb_index, f"{lb}")
                 lb_index += 1
 
-    # Get mail subjects from label
     def extract_subjects_by_label_func(event):
         global label_index
         listbox_subject_mails.delete(0, "end")
         label_index = listbox_labels_gmail.curselection()[0]
-        fetch_subjects_func(listbox_labels_gmail.curselection()[0])
+        fetch_subjects_func(listbox_labels_gmail.curselection()[0], 0)
 
-    # Back button
+    def event_pressed_previous():
+        global section_index
+
+        if section_index <= 0:
+            section_index = 0
+
+        elif section_index > 0:
+            section_index -= 1
+
+        fetch_subjects_func(label_index, section_index)
+
+    def event_pressed_next():
+        global section_index
+
+        if section_index <= 0:
+            section_index = 1
+
+        elif section_index > 0:
+            section_index += 1
+
+        fetch_subjects_func(label_index, section_index)
+
     def event_pressed_back():
         import navigation
 
@@ -136,28 +175,26 @@ def display_read_mail(username, password):
 
         global label_index
         index = listbox_subject_mails.curselection()[0]
-        mail_id = mails_ids[index]
+        mail_id = mail_ids[index]
 
         imap_client = imaplib.IMAP4_SSL("imap.gmail.com")
         imap_client.login(username, password)
 
         imap_client.select(f'"{mail_labels[label_index]}"')
-        print(mail_id)
         imap_client.uid("STORE", mail_id, "+X-GM-LABELS", "\\Trash")
         imap_client.expunge()
 
-        fetch_subjects_func(label_index)
+        fetch_subjects_func(label_index, section_index)
 
     def event_pressed_move():
         nonlocal mail_labels
-        mail_id = mails_ids[listbox_subject_mails.curselection()[0]]
-        print(mail_id)
+        mail_id = mail_ids[listbox_subject_mails.curselection()[0]]
         status = moving_dialog.moving_dialog(
             username, password, mail_labels[label_index], mail_labels, mail_id
         )
 
         if status:
-            fetch_subjects_func(label_index)
+            fetch_subjects_func(label_index, section_index)
         # label = mail_labels[label_index]
 
         # with MailBox("imap.mail.com").login(
@@ -167,48 +204,51 @@ def display_read_mail(username, password):
         #     mailbox.move(mailbox.fetch(mail_id, "(RFC822)"), "INBOX/folder2")
 
     def view_mail_func(event):
-        read_mail_func(
-            username, password, mails[listbox_subject_mails.curselection()[0]]
+        nonlocal current_mail
+
+        current_mail.clear()
+
+        current_mail = get_emails(
+            username,
+            password,
+            mail_labels[label_index],
+            mail_ids[listbox_subject_mails.curselection()[0]],
         )
+
+        read_mail_func(username, password, current_mail["mails"][0])
 
     def event_search():
         global label_index
 
         if entry_search.get():
             if entry_search.get().strip():
-                query = [word for word in entry_search.get().split(" ") if word.strip()]
+                query = [word for word in entry_search.get().split(":") if word.strip()]
 
-                if len(query) == 3:
+                if len(query) == 2:
                     if (
-                        (
-                            query[0] == "FROM"
-                            or query[0] == "TO"
-                            or query[0] == "SUBJECT"
-                        )
-                        and query[1] == ":"
-                        and (
-                            (pyisemail.is_email(query[2]) and query[0] != "SUBJECT")
-                            or (query[2].strip() and query[0] == "SUBJECT")
-                        )
+                        query[0] == "FROM" or query[0] == "TO" or query[0] == "SUBJECT"
+                    ) and (
+                        (pyisemail.is_email(query[1]) and query[0] != "SUBJECT")
+                        or (query[1].strip() and query[0] == "SUBJECT")
                     ):
 
                         search_string = (
-                            r'(X-GM-RAW "subject:\"' + query[2] + r'\"")'
+                            r'(X-GM-RAW "subject:\"' + query[1] + r'\"")'
                             if query[0] == "SUBJECT"
-                            else "(" + query[0] + ' "' + query[2] + '")'
+                            else "(" + query[0] + ' "' + query[1] + '")'
                         )
 
-                        temp_mails = get_emails(
-                            username, password, "[Gmail]/All Mail", search_string
-                        )["mails"]
                         temp_mails_ids = get_emails_id(
                             username, password, "[Gmail]/All Mail", search_string
                         )
+                        temp_mails = get_emails(
+                            username, password, "[Gmail]/All Mail", search_string
+                        )["mails"]
 
                         mails.clear()
                         listbox_subject_mails.delete(0, "end")
 
-                        mails_ids = temp_mails_ids
+                        mail_ids = temp_mails_ids
                         for index, mail in enumerate(temp_mails):
                             mails.append(mail)
 
@@ -273,30 +313,43 @@ def display_read_mail(username, password):
     button_create_label = Button(
         GUI_read_mail, text="New mailbox", command=create_mailbox
     )
-    button_create_label.place(x=10, y=390)
+    button_create_label.place(x=10, y=440)
 
     button_update_label = Button(GUI_read_mail, text="Refresh", command=update_mailbox)
-    button_update_label.place(x=205, y=390)
+    button_update_label.place(x=205, y=440)
 
     button_delete_label = Button(
         GUI_read_mail, text="Delete mailbox", command=delete_mailbox
     )
-    button_delete_label.place(x=100, y=390)
+    button_delete_label.place(x=100, y=440)
 
-    button_move = Button(
-        GUI_read_mail, text="Copy", command=event_pressed_move, width=10
+    # button_move = Button(
+    #     GUI_read_mail, text="Copy", command=event_pressed_move, width=10
+    # )
+    # button_move.place(x=395, y=390)
+
+    label_sections = Label(GUI_read_mail)
+    label_sections.place(x=450, y=390)
+
+    button_previous = Button(
+        GUI_read_mail, text="Previous", command=event_pressed_previous, width=10
     )
-    button_move.place(x=395, y=390)
+    button_previous.place(x=490, y=390)
+
+    button_next = Button(
+        GUI_read_mail, text="Next", command=event_pressed_next, width=10
+    )
+    button_next.place(x=585, y=390)
 
     button_delete = Button(
         GUI_read_mail, text="Delete", command=event_pressed_delete, width=10
     )
-    button_delete.place(x=490, y=390)
+    button_delete.place(x=490, y=440)
 
     button_back = Button(
         GUI_read_mail, text="Back", command=event_pressed_back, width=10
     )
-    button_back.place(x=585, y=390)
+    button_back.place(x=585, y=440)
 
     GUI_read_mail.mainloop()
 

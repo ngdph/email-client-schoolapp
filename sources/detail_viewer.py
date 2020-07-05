@@ -21,12 +21,21 @@ def read_mail_func(username, password, mail):
     email_attachments = []
     subject = mail["header"]["Subject"]
 
-    try:
-        email_from = mail["header"]["From"].decode()
-    except:
-        email_from = mail["header"]["From"]
+    if 'From' in mail['header']:
+        try:
+            email_from = mail["header"]["From"].decode()
+        except:
+            email_from = mail["header"]["From"]
+
+    if 'from' in mail['header']:
+        try:
+            email_from = mail["header"]["from"].decode()
+        except:
+            email_from = mail["header"]["from"]
+
     GUI_mail_reader = Tk()
     GUI_mail_reader.title(
+
         mail["header"]["Subject"].decode()
         if mail["header"]["Subject"] and isinstance(mail["header"]["Subject"], bytes)
         else mail["header"]["Subject"]
@@ -41,7 +50,6 @@ def read_mail_func(username, password, mail):
     label_sender.place(x=20, y=10)
 
     def event_pressed_decrypt():
-        print(email_content)
         decrypt_func(email_content, email_signature, email_signature_key)
 
     def event_pressed_save():
@@ -122,10 +130,8 @@ def read_mail_func(username, password, mail):
             email_signature_key = content["header"]["Signature-Verifier"]
 
         if "Content-Disposition" in content["header"]:
-            print("ádfà")
             value, params = cgi.parse_header(content["header"]["Content-Disposition"])
 
-            print(value, params)
 
             if "filename" in params or "filename*" in params:
 
@@ -137,7 +143,6 @@ def read_mail_func(username, password, mail):
                 if "filename*" in params:
                     filename = params["filename*"].split("''")[1]
 
-                print(filename)
 
                 file_index += 1
                 attachment = {
@@ -175,7 +180,6 @@ def read_mail_func(username, password, mail):
                     text=file_index,
                     values=(attachment["filename"], attachment["verified"]),
                 )
-                print("inserting")
                 email_attachments.append(attachment)
 
     if not email_content:

@@ -124,8 +124,6 @@ def forward_mail_func(
             msg["Subject"] = Subject
             msg["Bcc"] = bbc
 
-            print("send mail")
-
             # Neu message khong rong
             if message != "":
                 # Message của người gửi muốn người nhận nhận được

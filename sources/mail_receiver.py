@@ -4,7 +4,7 @@ import quopri
 import base64
 import re
 from email import header
-
+from email.parser import HeaderParser
 
 SERVER = "imap.gmail.com"
 
@@ -36,37 +36,61 @@ def get_emails_id(username, password, label, search_string="ALL"):
 
     status, data = mail.uid("SEARCH", None, search_string)
 
-    mailbox = {"label": "", "mailbox": []}
-    mailbox["label"] = label
-
-    mail_ids = []
+    ids = list()
 
     for block in data:
-        mail_ids = block.split()
+        ids = block.split()
 
-    return mail_ids[-12:]
+    ids.reverse()
+
+    # ids = ids.reverse()
+
+    return ids
 
 
-def get_emails(username, password, label, search_string="ALL"):
+def get_email_headers(username, password, label, mail_ids, search_string="ALL"):
+    mail = imaplib.IMAP4_SSL(SERVER)
+    mail.login(username, password)
+
+    mail.select(f'"{label}"')
+
+    # status, data = mail.uid("SEARCH", None, search_string)
+
+    headers = []
+
+    for i in mail_ids:
+        data = mail.uid("FETCH", i, "(BODY[HEADER.FIELDS (SUBJECT)])")
+        header_data = data[1][0][1]
+        parser = HeaderParser()
+
+        msg = parser.parsestr(header_data.decode())
+        subject = header.decode_header(msg.get("Subject"))[0][0]
+
+        headers.append({"Subject": subject})
+
+    return headers
+
+
+def get_emails(username, password, label, mail_ids, search_string="ALL"):
 
     mail = imaplib.IMAP4_SSL(SERVER)
     mail.login(username, password)
 
     mail.select(f'"{label}"')
 
-    status, data = mail.uid("SEARCH", None, search_string)
+    # status, data = mail.uid("SEARCH", None, search_string)
 
     mailbox = {"label": "", "mails": []}
     mailbox["label"] = label
 
-    mail_ids = []
+    # mail_ids = []
 
-    for block in data:
-        mail_ids = block.split()
+    # for block in data:
+    #     mail_ids = block.split()
 
-    # mail_ids = [mail_ids]
+    # # mail_ids = [mail_ids]
 
-    for i in mail_ids[-12:]:
+    for i in mail_ids:
         status, data = mail.uid("FETCH", i, "(RFC822)")
 
         mail_ = dict({"header": {}, "payload": []})
@@ -137,6 +161,6 @@ def get_emails(username, password, label, search_string="ALL"):
     return mailbox
 
 
-# print(get_labels("nhanth240500@gmail.com", "@177687Nhan@"))
+# get_email_headers("nhanth240500@gmail.com", "@177687Nhan@", "[Gmail]/Starred", [b"1"])
 # a = get_emails("nhanth240500@gmail.com", "@177687Nhan@", "[Gmail]/Starred")
 # print(a)
