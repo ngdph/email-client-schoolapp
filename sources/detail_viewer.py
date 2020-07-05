@@ -191,5 +191,5 @@ def read_mail_func(username, password, mail):
     text_message.configure(state=DISABLED)
     text_message.place(x=20, y=30)
 
-    # GUI_mail_reader.mainloop()
+    GUI_mail_reader.mainloop()
 

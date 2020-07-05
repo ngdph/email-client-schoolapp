@@ -6,7 +6,7 @@ from imap_tools.mailbox import MailBox
 
 def moving_dialog(username, password, init_label, labels, mail_id):
     root = Tk()
-    root.title("Move to...")
+    root.title("Copy to...")
     root.geometry("300x120")
     root.resizable(0, 0)
 
@@ -20,27 +20,28 @@ def moving_dialog(username, password, init_label, labels, mail_id):
 
     def on_accept():
 
-        try:
-            imap_client = imaplib.IMAP4_SSL("imap.gmail.com")
-            imap_client.login(username, password)
+        # try:
+        print(mail_id)
+        imap_client = imaplib.IMAP4_SSL("imap.gmail.com")
+        imap_client.login(username, password)
 
-            imap_client.select(f'"{init_label}"')
+        imap_client.select(f'"{init_label}"')
 
-            status, response = imap_client.copy(mail_id, f'"{label_list.get()}"')
+        status, response = imap_client.uid("COPY", mail_id, f'"{label_list.get()}"')
 
-            # if status == "OK":
-            #     imap_client.select(f'"{init_label}"')
-            #     imap_client.store(mail_id, "+X-GM-LABELS", "\\Trash")
-            #     imap_client.expunge()
-            #     # imap_client.move(mail_id.decode(),)
+        # if status == "OK":
+        #     imap_client.select(f'"{init_label}"')
+        #     imap_client.store(mail_id, "+X-GM-LABELS", "\\Trash")
+        #     imap_client.expunge()
+        #     # imap_client.move(mail_id.decode(),)
 
-            root.destroy()
-            return True
+        root.destroy()
+        return True
 
-        except Exception as e:
-            print(e)
-            root.destroy()
-            return False
+        # except Exception as e:
+        #     print(e)
+        #     root.destroy()
+        #     return False
 
     def on_cancel():
         root.destroy()
@@ -53,3 +54,9 @@ def moving_dialog(username, password, init_label, labels, mail_id):
     button_cancel.place(x=170, y=70, width=100, height=24)
 
     init_listbox()
+
+#     root.mainloop()
+
+
+# moving_dialog("f", "f", "f", "f", "f")
+
