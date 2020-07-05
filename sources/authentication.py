@@ -9,22 +9,16 @@ class Email:
     def __init__(self, account_id, account_password):
         self.username = account_id
         self.password = account_password
-
         import smtplib
-        import imaplib
 
         self.smtp = smtplib.SMTP("smtp.gmail.com", 587)
-        self.imap = imaplib.IMAP4_SSL("imap.gmail.com")
 
     def login(self):
         try:
-            self.smtp.connection("smtp.gmail.com", 587)
+            self.smtp.connect("smtp.gmail.com", 587)
             self.smtp.ehlo()
             self.smtp.starttls()
             self.smtp.login(self.username, self.password)
-
-            self.imap.login(self.username, self.password)
-
             return True
         except:
             return False
@@ -38,18 +32,10 @@ def display_pressed_about():
     )
 
 
-def display_pressed_Feedback():
-    messagebox.showinfo(
-        "Send feedback",
-        "Have feedback? We'd love to hear it, but please don't share sensitive information. Have questions or legal concerns? Try help or support at A14_PSY_SQUAD@gmail.com",
-    )
-
-
 class Authenticate:
     def __init__(self, GUI_login):
         # form login
         GUI_login.geometry("500x200")
-        GUI_login.resizable(0, 0)
         GUI_login.title("Authentication")
 
         # tạo và place Label ID và pass
@@ -58,8 +44,6 @@ class Authenticate:
 
         menu_about = Menu(GUI_login)
         menu_about.add_command(label="About", command=display_pressed_about)
-        menu_about.add_command(label="Feedback", command=display_pressed_Feedback)
-
         GUI_login.config(menu=menu_about)
 
         self.label_account_password = Label(
@@ -75,7 +59,7 @@ class Authenticate:
         self.entry_account_password.place(x=250, y=50, width=200)
 
         # make connection toi Gmail
-        self.button_login = Button(GUI_login, text="Log In", command=self.connection)
+        self.button_login = Button(GUI_login, text="Log In", command=self.connect)
         self.button_login.place(x=200, y=100)
 
         # label please turn on less secure app on Gmail before login
@@ -118,19 +102,19 @@ class Authenticate:
         )
         self.GUI_login = GUI_login
 
-    def connection(self):
+    def connect(self):
 
         username = self.entry_account_id.get()
         password = self.entry_account_password.get()
-        connection = Email(username, password)
-        login_status = connection.login()
+        connect = Email(username, password)
+        login_status = connect.login()
 
         if login_status:
             self.GUI_login.destroy()
-            display_navigation(username, password, connection)
+            display_navigation(username, password)
         else:
             messagebox.showerror(
-                "Could not connection, please try again",
+                "Could not connect, please try again",
                 "Username or password is invalid.",
             )
 

@@ -5,6 +5,8 @@ from detail_viewer import read_mail_func
 import threading
 from imapclient import IMAPClient
 import pyisemail
+from imap_tools import MailBox
+import moving_dialog
 
 # from future.moves.tkinter import simpledialog
 
@@ -25,15 +27,18 @@ def display_read_mail(username, password):
 
     # Get mail
     def fetch_subjects_func(index_of_label):
+        nonlocal mails
+        nonlocal mails_ids
+        print(mail_labels[index_of_label])
         temp_mails = get_emails(username, password, mail_labels[index_of_label])[
             "mails"
         ]
         temp_mails_ids = get_emails_id(username, password, mail_labels[index_of_label])
-        mail_index = 0
 
         # Clear all mails when choosing other label
+        listbox_subject_mails.delete(0, END)
         mails.clear()
-        # mails_ids.clear()
+        mails_ids.clear()
 
         mails_ids = temp_mails_ids
         # Append mail subject to list box subject
@@ -42,15 +47,26 @@ def display_read_mail(username, password):
 
             mail_subject = ""
             if "Subject" in mail["header"]:
-                try:
-                    mail_subject = mail["header"]["Subject"].decode()
-                except:
-                    mail_subject = mail["header"]["Subject"]
+
+                subject = mail["header"]["Subject"]
+
+                if isinstance(subject, str):
+                    if subject:
+                        mail_subject = subject
+
+                    else:
+                        mail_subject = "(No subject)"
+
+                if isinstance(subject, bytes):
+                    mail_subject = subject.decode()
+
+                    if not mail_subject:
+                        mail_subject = "(No subject)"
+
             else:
                 mail_subject = "(No subject)"
 
-            listbox_subject_mails.insert(mail_index, mail_subject)
-            mail_index += 1
+            listbox_subject_mails.insert(index, mail_subject)
 
     def create_mailbox():
         mailbox_name = simpledialog.askstring(
@@ -60,7 +76,7 @@ def display_read_mail(username, password):
         if mailbox_name:
             imap_client = imaplib.IMAP4_SSL("imap.gmail.com")
             imap_client.login(username, password)
-            imap_client.create(mailbox_name)
+            imap_client.create(f'"{mailbox_name}"')
 
             listbox_labels_gmail.delete(0, END)
             mail_labels = get_labels(username, password)
@@ -68,6 +84,20 @@ def display_read_mail(username, password):
             for lb in mail_labels:
                 listbox_labels_gmail.insert(lb_index, f"{lb}")
                 lb_index += 1
+
+    def update_mailbox():
+        nonlocal mail_labels
+
+        listbox_labels_gmail.delete(0, END)
+
+        mail_labels.clear()
+        mail_labels = get_labels(username, password)
+
+        for lb_index, lb in enumerate(mail_labels):
+            print(lb, lb_index)
+            listbox_labels_gmail.insert(lb_index, f"{lb}")
+
+        fetch_subjects_func(label_index)
 
     def delete_mailbox():
         labels = mail_labels
@@ -106,15 +136,35 @@ def display_read_mail(username, password):
 
         global label_index
         index = listbox_subject_mails.curselection()[0]
-        mail_id = listbox_subject_mails.get(index)[1]
+        mail_id = mails_ids[index]
 
         imap_client = imaplib.IMAP4_SSL("imap.gmail.com")
         imap_client.login(username, password)
 
         imap_client.select(f'"{mail_labels[label_index]}"')
-
-        imap_client.store(mail_id, "X-GM-LABELS", "\\Trash")
+        print(mail_id)
+        imap_client.uid("STORE", mail_id, "+X-GM-LABELS", "\\Trash")
         imap_client.expunge()
+
+        fetch_subjects_func(label_index)
+
+    def event_pressed_move():
+        nonlocal mail_labels
+        mail_id = mails_ids[listbox_subject_mails.curselection()[0]]
+        print(mail_id)
+        status = moving_dialog.moving_dialog(
+            username, password, mail_labels[label_index], mail_labels, mail_id
+        )
+
+        if status:
+            fetch_subjects_func(label_index)
+        # label = mail_labels[label_index]
+
+        # with MailBox("imap.mail.com").login(
+        #     username, password, initial_folder=label
+        # ) as mailbox:
+
+        #     mailbox.move(mailbox.fetch(mail_id, "(RFC822)"), "INBOX/folder2")
 
     def view_mail_func(event):
         read_mail_func(
@@ -154,7 +204,6 @@ def display_read_mail(username, password):
                         temp_mails_ids = get_emails_id(
                             username, password, "[Gmail]/All Mail", search_string
                         )
-                        mail_index = 0
 
                         mails.clear()
                         listbox_subject_mails.delete(0, "end")
@@ -164,29 +213,30 @@ def display_read_mail(username, password):
                             mails.append(mail)
 
                             mail_subject = ""
-                            if mail["header"]["Subject"]:
-                                mail_subject = mail["header"]["Subject"]
+                            if "Subject" in mail["header"]:
+
+                                subject = mail["header"]["Subject"]
+
+                                if isinstance(subject, str):
+                                    if subject:
+                                        mail_subject = subject
+
+                                    else:
+                                        mail_subject = "(No subject)"
+
+                                if isinstance(subject, bytes):
+                                    mail_subject = subject.decode()
+
+                                    if not mail_subject:
+                                        mail_subject = "(No subject)"
+
                             else:
                                 mail_subject = "(No subject)"
 
-                            listbox_subject_mails.insert(mail_index, mail_subject)
-                            mail_index += 1
+                            listbox_subject_mails.insert(index, mail_subject)
 
         else:
             messagebox.showerror("Error", "Search input is invalid.")
-
-    def on_close():
-        threads = threading.enumerate()
-
-        # for thread in threads:
-        #     thread._stop.
-
-    # Listbox Labels navigation
-    # label_gmail = Label(GUI_read_mail, text="Labels")
-    # label_gmail.place(x=10, y=10)
-
-    # compose_search = Button(GUI_read_mail, text="Send mail")
-    # compose_search.place(x=45, y=15, width=100, height=30)
 
     entry_search = Entry(GUI_read_mail, width=60)
     entry_search.place(x=210, y=19)
@@ -225,25 +275,33 @@ def display_read_mail(username, password):
     )
     button_create_label.place(x=10, y=390)
 
+    button_update_label = Button(GUI_read_mail, text="Refresh", command=update_mailbox)
+    button_update_label.place(x=205, y=390)
+
     button_delete_label = Button(
         GUI_read_mail, text="Delete mailbox", command=delete_mailbox
     )
     button_delete_label.place(x=100, y=390)
 
-    button_back = Button(
-        GUI_read_mail, text="Back", command=event_pressed_back, width=10
+    button_move = Button(
+        GUI_read_mail, text="Copy", command=event_pressed_move, width=10
     )
-    button_back.place(x=585, y=390)
+    button_move.place(x=395, y=390)
 
     button_delete = Button(
         GUI_read_mail, text="Delete", command=event_pressed_delete, width=10
     )
     button_delete.place(x=490, y=390)
 
-    # GUI_read_mail.protocol("WM_DELETE_WINDOW", on_close)
+    button_back = Button(
+        GUI_read_mail, text="Back", command=event_pressed_back, width=10
+    )
+    button_back.place(x=585, y=390)
+
     GUI_read_mail.mainloop()
 
 
 display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
-# display_read_mail("nguyen.dphux@gmail.com", ".*")
+# display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
+# display_read_mail("18520326", ".*")
 

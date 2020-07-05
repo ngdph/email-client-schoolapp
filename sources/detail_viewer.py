@@ -122,10 +122,22 @@ def read_mail_func(username, password, mail):
             email_signature_key = content["header"]["Signature-Verifier"]
 
         if "Content-Disposition" in content["header"]:
+            print("ádfà")
             value, params = cgi.parse_header(content["header"]["Content-Disposition"])
 
-            if "filename" in params:
-                filename = params["filename"]
+            print(value, params)
+
+            if "filename" in params or "filename*" in params:
+
+                filename = ""
+
+                if "filename" in params:
+                    filename = params["filename"]
+
+                if "filename*" in params:
+                    filename = params["filename*"].split("''")[1]
+
+                print(filename)
 
                 file_index += 1
                 attachment = {
@@ -163,6 +175,7 @@ def read_mail_func(username, password, mail):
                     text=file_index,
                     values=(attachment["filename"], attachment["verified"]),
                 )
+                print("inserting")
                 email_attachments.append(attachment)
 
     if not email_content:

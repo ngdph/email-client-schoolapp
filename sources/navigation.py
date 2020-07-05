@@ -5,7 +5,7 @@ from mail_manager import display_read_mail
 from mail_sender import display_send_mail
 
 
-def display_navigation(username, password, connection):
+def display_navigation(username, password):
     # tạo form option
     GUI_navigation = Tk()
     GUI_navigation.title("Navigation")

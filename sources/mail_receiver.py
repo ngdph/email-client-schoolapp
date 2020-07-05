@@ -34,7 +34,7 @@ def get_emails_id(username, password, label, search_string="ALL"):
 
     mail.select(f'"{label}"')
 
-    status, data = mail.search(None, search_string)
+    status, data = mail.uid("SEARCH", None, search_string)
 
     mailbox = {"label": "", "mailbox": []}
     mailbox["label"] = label
@@ -44,7 +44,7 @@ def get_emails_id(username, password, label, search_string="ALL"):
     for block in data:
         mail_ids = block.split()
 
-    return mail_ids[-7:]
+    return mail_ids[-12:]
 
 
 def get_emails(username, password, label, search_string="ALL"):
@@ -54,7 +54,7 @@ def get_emails(username, password, label, search_string="ALL"):
 
     mail.select(f'"{label}"')
 
-    status, data = mail.search(None, search_string)
+    status, data = mail.uid("SEARCH", None, search_string)
 
     mailbox = {"label": "", "mails": []}
     mailbox["label"] = label
@@ -64,10 +64,10 @@ def get_emails(username, password, label, search_string="ALL"):
     for block in data:
         mail_ids = block.split()
 
-    # mail_ids = [mail_ids[-2]]
+    # mail_ids = [mail_ids]
 
-    for i in mail_ids:
-        status, data = mail.fetch(i, "(RFC822)")
+    for i in mail_ids[-12:]:
+        status, data = mail.uid("FETCH", i, "(RFC822)")
 
         mail_ = dict({"header": {}, "payload": []})
 
@@ -95,7 +95,9 @@ def get_emails(username, password, label, search_string="ALL"):
 
                                     if field[0] in ["Subject", "From", "To"]:
                                         mail_["header"][field[0]] = (
-                                            header.decode_header(field[1])[0][0] if field[1] else b""
+                                            header.decode_header(field[1])[0][0]
+                                            if field[1]
+                                            else b""
                                         )
 
                                 content_["payload"] = items.get_payload(decode=True)
@@ -118,7 +120,9 @@ def get_emails(username, password, label, search_string="ALL"):
 
                         if field[0] in ["Subject", "From", "To"]:
                             mail_["header"][field[0]] = (
-                                header.decode_header(field[1])[0][0] if field[1] else b""
+                                header.decode_header(field[1])[0][0]
+                                if field[1]
+                                else b""
                             )
 
                     content_["payload"] = message.get_payload(decode=True)

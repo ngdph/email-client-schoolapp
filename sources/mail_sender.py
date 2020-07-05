@@ -334,5 +334,5 @@ def display_send_mail(username, password, list_reciever=None):
     GUI_send_mail.mainloop()
 
 
-display_send_mail("nhanth240500@gmail.com", "@177687Nhan@")
+# display_send_mail("nhanth240500@gmail.com", "@177687Nhan@")
 
