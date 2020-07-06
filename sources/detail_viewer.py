@@ -21,13 +21,13 @@ def read_mail_func(username, password, mail):
     email_attachments = []
     subject = mail["header"]["Subject"]
 
-    if 'From' in mail['header']:
+    if "From" in mail["header"]:
         try:
             email_from = mail["header"]["From"].decode()
         except:
             email_from = mail["header"]["From"]
 
-    if 'from' in mail['header']:
+    if "from" in mail["header"]:
         try:
             email_from = mail["header"]["from"].decode()
         except:
@@ -35,7 +35,6 @@ def read_mail_func(username, password, mail):
 
     GUI_mail_reader = Tk()
     GUI_mail_reader.title(
-
         mail["header"]["Subject"].decode()
         if mail["header"]["Subject"] and isinstance(mail["header"]["Subject"], bytes)
         else mail["header"]["Subject"]
@@ -132,7 +131,6 @@ def read_mail_func(username, password, mail):
         if "Content-Disposition" in content["header"]:
             value, params = cgi.parse_header(content["header"]["Content-Disposition"])
 
-
             if "filename" in params or "filename*" in params:
 
                 filename = ""
@@ -142,7 +140,6 @@ def read_mail_func(username, password, mail):
 
                 if "filename*" in params:
                     filename = params["filename*"].split("''")[1]
-
 
                 file_index += 1
                 attachment = {

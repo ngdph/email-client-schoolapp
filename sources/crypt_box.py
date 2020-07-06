@@ -33,7 +33,7 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
             public_key = pkcs1_15.new(pub_key)
 
             cipher_message = mail_content.decode()
-
+            print(cipher_message)
             hashed_m = SHA256.new()
             hashed_m.update(cipher_message.encode())
 
@@ -41,6 +41,7 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
             hashed_message = signature_hex
 
         except Exception as e:
+            print(e)
             print("This message is invalid", e)
             # messagebox.showerror("The signature of this mail is invalid.",)
 
