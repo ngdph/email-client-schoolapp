@@ -27,18 +27,20 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
     if pub_key_hex and signature_hex:
         try:
             signature = bytes.fromhex(signature_hex)
+            print(signature, type(signature))
             pub_key = RSA.importKey(
                 PEM.encode(bytes.fromhex(pub_key_hex), "PUBLIC KEY")
             )
             public_key = pkcs1_15.new(pub_key)
 
-            cipher_message = mail_content.decode()
-            print(cipher_message)
-            hashed_m = SHA256.new()
-            hashed_m.update(cipher_message.encode())
+            
 
-            public_key.verify(hashed_m, signature)
+            cipher_message = mail_content.decode()
+            hashed_m = SHA256.new(mail_content)
+            # hashed_m.update()
+
             hashed_message = signature_hex
+            public_key.verify(hashed_m, signature)
 
         except Exception as e:
             print(e)
