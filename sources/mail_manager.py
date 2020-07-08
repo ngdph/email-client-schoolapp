@@ -216,7 +216,11 @@ def display_read_mail(username, password):
 
         if entry_search.get():
             if entry_search.get().strip():
-                query = [word.strip() for word in entry_search.get().split(":") if word.strip()]
+                query = [
+                    word.strip()
+                    for word in entry_search.get().split(":")
+                    if word.strip()
+                ]
 
                 if len(query) == 2:
                     if (
@@ -323,23 +327,27 @@ def display_read_mail(username, password):
     # Bind view mail function to mail subject
     listbox_subject_mails.bind("<Double-Button-1>", view_mail_func)
 
-    button_create_label = Button(
-        GUI_read_mail, text="New mailbox", command=create_mailbox
-    )
-    button_create_label.place(x=10, y=440)
+    # button_create_label = Button(
+    #     GUI_read_mail, text="New mailbox", command=create_mailbox
+    # )
+    # button_create_label.place(x=10, y=440)
 
     button_update_label = Button(GUI_read_mail, text="Refresh", command=refresh)
-    button_update_label.place(x=205, y=440)
-
-    button_delete_label = Button(
-        GUI_read_mail, text="Delete mailbox", command=delete_mailbox
+    button_update_label.place(
+        # x=205, y=440
+        x=10,
+        y=440,
     )
-    button_delete_label.place(x=100, y=440)
 
-    button_move = Button(
-        GUI_read_mail, text="Copy", command=event_pressed_copy, width=10
-    )
-    button_move.place(x=395, y=390)
+    # button_delete_label = Button(
+    #     GUI_read_mail, text="Delete mailbox", command=delete_mailbox
+    # )
+    # button_delete_label.place(x=100, y=440)
+
+    # button_move = Button(
+    #     GUI_read_mail, text="Copy", command=event_pressed_copy, width=10
+    # )
+    # button_move.place(x=395, y=390)
 
     label_sections = Label(GUI_read_mail)
     label_sections.place(x=350, y=390)
@@ -368,6 +376,6 @@ def display_read_mail(username, password):
 
 
 # display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
-display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
+# display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
 # display_read_mail("18520326", ".*")
 

@@ -33,14 +33,12 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
             )
             public_key = pkcs1_15.new(pub_key)
 
-            
-
             cipher_message = mail_content.decode()
-            hashed_m = SHA256.new(mail_content)
-            # hashed_m.update()
+            hashed_m = SHA256.new()
+            hashed_m.update(cipher_message.encode())
 
-            hashed_message = signature_hex
             public_key.verify(hashed_m, signature)
+            hashed_message = signature_hex
 
         except Exception as e:
             print(e)

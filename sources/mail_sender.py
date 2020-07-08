@@ -36,7 +36,7 @@ def display_send_mail(username, password, list_reciever=None):
             password,
             entry_to.get(),
             entry_subject.get(),
-            entry_message.get(0.0, END),
+            entry_message.get("1.0", END),
             filepaths.get().split(", "),
             combobox_select_crypto.get(),
         )
@@ -147,7 +147,7 @@ def display_send_mail(username, password, list_reciever=None):
     def send_mail_func(
         username,
         password,
-        receiver_email="",
+        recipient="",
         Subject="",
         message="",
         list_file=[],
@@ -157,18 +157,18 @@ def display_send_mail(username, password, list_reciever=None):
         smtp_server = "smtp.gmail.com"
 
         # Neu khong co nguoi nhan
-        if receiver_email != "":
+        if recipient != "":
 
             # Neu message khong rong hoac co file dinh kem
             if message != "" or list_file[0] != "":
-                bbc = receiver_email
+                bbc = recipient
                 msg = MIMEMultipart()
 
                 # msg = MIMEMultipart("alternative"); #Dùng khi gửi theo dạng html
 
                 # Thông tin về From, To, Subject, Bcc của mail.
                 msg["From"] = username
-                msg["To"] = receiver_email
+                msg["To"] = recipient
                 msg["Subject"] = Subject
                 msg["Bcc"] = bbc
 
@@ -310,7 +310,7 @@ def display_send_mail(username, password, list_reciever=None):
                     server.login(username, password)
 
                     # Tiến hành gửi mail từ người gửi tới người nhận, message được định dang theo string.
-                    server.sendmail(username, receiver_email, all_message)
+                    server.sendmail(username, recipient, all_message)
 
                     messagebox.showinfo("Success", "Sent!")
                     server.quit()
