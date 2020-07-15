@@ -1,6 +1,6 @@
 from tkinter import *
 from tkinter import messagebox
-from tkinter.ttk import Combobox, Label
+from tkinter.ttk import Combobox, Label, Treeview
 from Crypto.Hash import SHA256, SHA512
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
@@ -8,18 +8,22 @@ from Crypto.IO import PEM
 import cryptor
 import unidecode
 import tkinter
+import os
+import base64
 
 
-def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
+def decrypt_func(mail_content, signature_hex="", pub_key_hex="", files=[]):
 
     cipher_message = mail_content.decode()
     hashed_message = ""
     signature = ""
     public_key = ""
 
+    decrypted_attachments = []
+
     GUI_crypt_box = Tk()
     GUI_crypt_box.title("Crypt Box")
-    GUI_crypt_box.geometry("800x600")
+    GUI_crypt_box.geometry("800x650")
     GUI_crypt_box.resizable(0, 0)
 
     plain_message = ""
@@ -49,11 +53,33 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
         cipher_message = "Not supported yet"
         plain_message = ""
 
+    treeview = Treeview(GUI_crypt_box, height=4)
+    treeview.place(x=20, y=520)
+
+    vertical_scrollbar = Scrollbar(
+        GUI_crypt_box, orient="vertical", command=treeview.yview
+    )
+    # vertical_scrollbar.place(x=750, y=520)
+
+    treeview.configure(xscrollcommand=vertical_scrollbar.set)
+    treeview["columns"] = ("File", "Decrypted")
+    treeview["show"] = "headings"
+
+    treeview.column("File", width=370, anchor="c")
+    treeview.column("Decrypted", width=370, anchor="c")
+
+    treeview.heading("File", text="File")
+    treeview.heading("Decrypted", text="Verified status")
+
     def event_pressed_decrypt():
         plain_message = "Please choose decryption type"
 
-        if text_plaintext.get("1.0", "end"):
-            text_plaintext.delete("1.0", "end")
+        if text_plaintext.get("1.0", END):
+            text_plaintext.delete("1.0", END)
+
+        if decrypted_attachments:
+            decrypted_attachments.clear()
+            treeview.delete()
 
         selection = combobox_select_crypto.get()
         try:
@@ -63,21 +89,187 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
                     cipher_message, int(entry_key.get())
                 )
 
+                if files:
+                    for file_index, file in enumerate(files):
+                        decrypted_file = {
+                            "filename": file["filename"],
+                            "payload": file["payload"]["payload"],
+                            "verified": "",
+                        }
+
+                        try:
+                            decrypted_file["payload"] = cryptor.XOR_Encrypt(
+                                base64.b64decode(file["payload"]["payload"]),
+                                entry_key.get(),
+                            )
+                            decrypted_file["verified"] = "successful"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        except Exception as err:
+                            decrypted_file["payload"] = file["payload"]["payload"]
+                            decrypted_file["verified"] = "failed"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        finally:
+                            decrypted_attachments.append(decrypted_file)
+
             if selection == "VIGENERE":
                 handled_key = unidecode.unidecode(
                     str(entry_key.get()).lower().replace(" ", "")
                 )
+
                 plain_message = cryptor.Vigenere_Decrypt(cipher_message, handled_key)
+
+                if files:
+                    for file_index, file in enumerate(files):
+                        decrypted_file = {
+                            "filename": file["filename"],
+                            "payload": file["payload"]["payload"],
+                            "verified": "",
+                        }
+
+                        try:
+                            decrypted_file["payload"] = cryptor.XOR_Encrypt(
+                                base64.b64decode(file["payload"]["payload"]),
+                                entry_key.get(),
+                            )
+                            decrypted_file["verified"] = "successful"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        except Exception as err:
+                            decrypted_file["payload"] = file["payload"]["payload"]
+                            decrypted_file["verified"] = "failed"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        finally:
+                            decrypted_attachments.append(decrypted_file)
 
             if selection == "AES":
                 plain_message = cryptor.AES_Decrypt(
                     cipher_message, entry_key.get(), entry_iv.get()
                 )
 
+                if files:
+                    for file_index, file in enumerate(files):
+                        decrypted_file = {
+                            "filename": file["filename"],
+                            "payload": file["payload"]["payload"],
+                            "verified": "",
+                        }
+
+                        try:
+                            print(entry_key.get(), entry_iv.get())
+                            decrypted_file["payload"] = cryptor.AES_Decrypt(
+                                file["payload"]["payload"],
+                                entry_key.get(),
+                                entry_iv.get(),
+                            )
+                            decrypted_file["verified"] = "successful"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        except Exception as err:
+                            print(err)
+                            decrypted_file["payload"] = file["payload"]["payload"]
+                            decrypted_file["verified"] = "failed"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        finally:
+                            decrypted_attachments.append(decrypted_file)
+
             if selection == "DES":
                 plain_message = cryptor.DES_Decrypt(
                     cipher_message, entry_key.get(), entry_iv.get()
                 )
+
+                if files:
+                    for file_index, file in enumerate(files):
+                        decrypted_file = {
+                            "filename": file["filename"],
+                            "payload": file["payload"]["payload"],
+                            "verified": "",
+                        }
+
+                        try:
+                            decrypted_file["payload"] = cryptor.DES_Decrypt(
+                                file["payload"]["payload"],
+                                entry_key.get(),
+                                entry_iv.get(),
+                            )
+                            decrypted_file["verified"] = "successful"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        except Exception as err:
+                            print(err)
+                            decrypted_file["payload"] = file["payload"]["payload"]
+                            decrypted_file["verified"] = "failed"
+
+                            treeview.insert(
+                                "",
+                                "end",
+                                text=file_index,
+                                values=(
+                                    decrypted_file["filename"],
+                                    decrypted_file["verified"],
+                                ),
+                            )
+                        finally:
+                            decrypted_attachments.append(decrypted_file)
 
             if not text_plaintext.compare("end-1c", "==", "1.0"):
                 text_plaintext.delete("1.0", END)
@@ -91,8 +283,17 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
             )
         except Exception as e:
             text_plaintext.insert(
-                INSERT, str(e) if selection else plain_message, CHAR,
+                INSERT, str(e) if not selection else plain_message, CHAR,
             )
+
+    def event_pressed_save_all():
+        for file in decrypted_attachments:
+            print(file)
+            path = os.path.join("C:/Users", os.getlogin(), "Downloads", "Mailex")
+            os.makedirs(path, exist_ok=True)
+            f = open(os.path.join(path, file["filename"]), "wb")
+            f.write(file["payload"])
+            f.close()
 
     text_ciphertext = Text(GUI_crypt_box, wrap="word", width=45, height=15)
     text_ciphertext.insert(INSERT, cipher_message)
@@ -133,12 +334,12 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
     entry_iv.configure(state=DISABLED)
     entry_iv.place(x=150, y=340)
 
-    entry_signature = Text(GUI_crypt_box, width=45, height=5)
+    entry_signature = Text(GUI_crypt_box, width=45, height=4)
     entry_signature.insert("1.0", signature_hex)
     entry_signature.configure(state=DISABLED)
     entry_signature.place(x=20, y=400)
 
-    entry_hashed_message = Text(GUI_crypt_box, width=45, height=5)
+    entry_hashed_message = Text(GUI_crypt_box, width=45, height=4)
     entry_hashed_message.insert("1.0", hashed_message)
     entry_hashed_message.configure(state=DISABLED)
     entry_hashed_message.place(x=410, y=400)
@@ -147,7 +348,12 @@ def decrypt_func(mail_content, signature_hex="", pub_key_hex=""):
     button_decrypt = Button(
         GUI_crypt_box, text="Decrypt", command=event_pressed_decrypt, width=10
     )
-    button_decrypt.place(x=350, y=520)
+    button_decrypt.place(x=650, y=480)
+
+    button_save_all = Button(
+        GUI_crypt_box, text="Save all", command=event_pressed_save_all, width=10
+    )
+    button_save_all.place(x=550, y=480)
 
     def event_selected_crypto(event):
         selected_type = combobox_select_crypto.get()

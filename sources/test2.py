@@ -162,10 +162,19 @@
 # public_key = pkcs1_15.new(pub_key)
 
 
-
 # cipher_message = mail_content.decode()
 # hashed_m = SHA256.new(mail_content)
 # # hashed_m.update()
 
 # public_key.verify(hashed_m, signature)
 # hashed_message = signature_hex
+
+import cryptor
+
+file = open("./windowed.spec", "rb")
+key = "123456"
+
+ciphertext = cryptor.AES_Encrypt(file.read(), key, key)
+print(ciphertext)
+plaintext = cryptor.AES_Decrypt(ciphertext, key, key)
+print(plaintext)

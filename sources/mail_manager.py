@@ -376,6 +376,6 @@ def display_read_mail(username, password):
 
 
 # display_read_mail("nhanth240500@gmail.com", "@177687Nhan@")
-# display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
+display_read_mail("18520165@gm.uit.edu.vn", "1634608674")
 # display_read_mail("18520326", ".*")
 

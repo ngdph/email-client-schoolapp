@@ -49,7 +49,9 @@ def read_mail_func(username, password, mail):
     label_sender.place(x=20, y=10)
 
     def event_pressed_decrypt():
-        decrypt_func(email_content, email_signature, email_signature_key)
+        decrypt_func(
+            email_content, email_signature, email_signature_key, email_attachments
+        )
 
     def event_pressed_save():
         for file in email_attachments:
@@ -145,7 +147,7 @@ def read_mail_func(username, password, mail):
                 attachment = {
                     "filename": filename,
                     "payload": content,
-                    "verified": "Verified",
+                    "verified": "Unverified",
                 }
 
                 if "Signature" in content["header"]:

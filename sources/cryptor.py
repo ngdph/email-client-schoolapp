@@ -1,5 +1,5 @@
 from Crypto import Random
-from Crypto.Util import Padding
+from Crypto.Util import Padding, strxor
 
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP, DES, AES, PKCS1_v1_5
@@ -39,6 +39,12 @@ def length_handler(data="", length=0):
     return data.encode()
 
 
+def XOR_Encrypt(plaintext, key):
+    ciphertext = strxor.strxor_c(plaintext, key)
+
+    return ciphertext
+
+
 def RSA_Encrypt(plaintext, key):
     public_key = key.publickey().exportKey("PEM")
 
@@ -63,7 +69,12 @@ def DES_Encrypt(plaintext, key, iv):
 
     cipher = DES.new(handled_key, DES.MODE_CBC, handled_iv)
     ciphertext = base64.b64encode(
-        cipher.encrypt(Padding.pad(plaintext.encode(), DES.block_size))
+        cipher.encrypt(
+            Padding.pad(
+                plaintext.encode() if isinstance(plaintext, str) else plaintext,
+                DES.block_size,
+            )
+        )
     )
 
     return ciphertext
@@ -73,7 +84,9 @@ def DES_Decrypt(cipher, key, iv):
     handled_key = length_handler(key, DES.block_size)
     handled_iv = length_handler(iv, DES.block_size)
 
-    ciphertext = base64.b64decode(cipher)
+    ciphertext = base64.b64decode(
+        cipher.encode() if isinstance(cipher, str) else cipher
+    )
 
     crypt = DES.new(handled_key, DES.MODE_CBC, handled_iv)
     plaintext = Padding.unpad(crypt.decrypt(ciphertext), DES.block_size)
@@ -86,7 +99,14 @@ def AES_Encrypt(plaintext, key, iv):
     handled_iv = length_handler(iv, 16)
 
     cipher = AES.new(handled_key, AES.MODE_CBC, handled_iv)
-    ciphertext = base64.b64encode(cipher.encrypt(Padding.pad(plaintext.encode(), 16)))
+    ciphertext = base64.b64encode(
+        cipher.encrypt(
+            Padding.pad(
+                plaintext.encode() if isinstance(plaintext, str) else plaintext,
+                AES.block_size,
+            )
+        )
+    )
 
     return ciphertext
 
@@ -95,7 +115,9 @@ def AES_Decrypt(cipher, key, iv):
     handled_key = length_handler(key, 16)
     handled_iv = length_handler(iv, 16)
 
-    ciphertext = base64.b64decode(cipher)
+    ciphertext = base64.b64decode(
+        cipher.encode() if isinstance(cipher, str) else cipher
+    )
 
     crypt = AES.new(handled_key, AES.MODE_CBC, handled_iv)
     plaintext = Padding.unpad(crypt.decrypt(ciphertext), AES.block_size)

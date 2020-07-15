@@ -259,43 +259,101 @@ def display_send_mail(username, password, list_reciever=None):
                     # sau khi print ra thì filepath bị split mỗi kí tự thành 1 phần tử của list => sai
                     # cần fix lỗi chỗ này.
 
-                    for i in range(0, len(attachments)):
-                        file = attachments[i]
-                        file_basename = os.path.basename(file)
-                        # Open PDF file in binary mode
-                        attachment = open(file, "rb")
-                        attachment.seek(0)
-                        attachment_content = attachment.read()
-                        # Add file as application/octet-stream
-                        # Email client can usually download this automatically as attachment
-                        file_mail = MIMEBase("application", "octet-stream")
-                        file_mail.set_payload(attachment_content)
+                    if crypto_type:
+                        for i in range(0, len(attachments)):
+                            file = attachments[i]
+                            file_basename = os.path.basename(file)
+                            # Open PDF file in binary mode
+                            attachment = open(file, "rb")
+                            attachment.seek(0)
+                            attachment_content = attachment.read()
 
-                        # Encode file in ASCII characters to send by email
-                        encoders.encode_base64(file_mail)
+                            if crypto_type == "AES":
+                                attachment_content = cryptor.AES_Encrypt(
+                                    attachment_content, encryption_key, encryption_iv,
+                                )
 
-                        # Add header as key/value pair to attachment part
-                        file_mail.add_header(
-                            "Content-Disposition",
-                            "attachment",
-                            filename=("utf-8", "", file_basename),
-                        )
-                        msg.attach(file_mail)
+                            elif crypto_type == "DES":
+                                attachment_content = cryptor.DES_Encrypt(
+                                    attachment_content, encryption_key, encryption_iv,
+                                )
 
-                        signature = cryptor.sign_message(
-                            attachment_content, private_key
-                        )
+                            else:
+                                attachment_content = base64.b64encode(
+                                    cryptor.XOR_Encrypt(
+                                        attachment_content, encryption_key
+                                    )
+                                )
 
-                        hex_signature = signature.hex()
+                            file_mail = MIMEBase("application", "octet-stream")
+                            file_mail.set_payload(attachment_content)
 
-                        file_mail.add_header(
-                            "Signature", hex_signature,
-                        )
+                            # Encode file in ASCII characters to send by email
+                            encoders.encode_base64(file_mail)
 
-                        file_mail.add_header(
-                            "Signature-Verifier", public_key.export_key("DER").hex(),
-                        )
-                        attachment.close()
+                            # Add header as key/value pair to attachment part
+                            file_mail.add_header(
+                                "Content-Disposition",
+                                "attachment",
+                                filename=("utf-8", "", file_basename),
+                            )
+                            msg.attach(file_mail)
+
+                            signature = cryptor.sign_message(
+                                attachment_content, private_key
+                            )
+
+                            hex_signature = signature.hex()
+
+                            file_mail.add_header(
+                                "Signature", hex_signature,
+                            )
+
+                            file_mail.add_header(
+                                "Signature-Verifier",
+                                public_key.export_key("DER").hex(),
+                            )
+                            attachment.close()
+
+                    else:
+                        for i in range(0, len(attachments)):
+                            file = attachments[i]
+                            file_basename = os.path.basename(file)
+                            # Open PDF file in binary mode
+                            attachment = open(file, "rb")
+                            attachment.seek(0)
+                            attachment_content = attachment.read()
+                            # Add file as application/octet-stream
+                            # Email client can usually download this automatically as attachment
+                            file_mail = MIMEBase("application", "octet-stream")
+                            file_mail.set_payload(attachment_content)
+
+                            # Encode file in ASCII characters to send by email
+                            encoders.encode_base64(file_mail)
+
+                            # Add header as key/value pair to attachment part
+                            file_mail.add_header(
+                                "Content-Disposition",
+                                "attachment",
+                                filename=("utf-8", "", file_basename),
+                            )
+                            msg.attach(file_mail)
+
+                            signature = cryptor.sign_message(
+                                attachment_content, private_key
+                            )
+
+                            hex_signature = signature.hex()
+
+                            file_mail.add_header(
+                                "Signature", hex_signature,
+                            )
+
+                            file_mail.add_header(
+                                "Signature-Verifier",
+                                public_key.export_key("DER").hex(),
+                            )
+                            attachment.close()
 
                 all_message = msg.as_string()
 
@@ -334,5 +392,5 @@ def display_send_mail(username, password, list_reciever=None):
     GUI_send_mail.mainloop()
 
 
-# display_send_mail("nhanth240500@gmail.com", "@177687Nhan@")
+display_send_mail("nhanth240500@gmail.com", "@177687Nhan@")
 
