@@ -6,7 +6,7 @@ black==19.10b0
 cffi==1.14.0
 click==7.1.2
 colorama==0.4.3
-cryptography==2.9.2
+cryptography==3.2
 cryptokit==0.0.8
 easygui==0.98.1
 future==0.18.2
